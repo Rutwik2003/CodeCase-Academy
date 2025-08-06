@@ -5,6 +5,7 @@ import { useInteractiveTour } from '../contexts/InteractiveTourContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { DailyLoginModal } from './DailyLoginModal';
 import { EnhancedReferralModal } from './EnhancedReferralModal';
+import { AudioWaveform } from './AudioWaveform';
 import { isAdminEmail } from '../cms/utils/adminAuth';
 import { logger, LogCategory } from '../utils/logger';
 import { formatPoints } from '../utils/formatters';
@@ -84,7 +85,7 @@ export const Header: React.FC<HeaderProps> = ({
         };
       }
     } catch (error) {
-      logger.error('Error in getUserHelpStatus:', error, LogCategory.COMPONENT);
+      logger.error('Error in getUserHelpStatus:', error, LogCategory.SYSTEM);
       return { type: 'new', message: 'Take a Quick Tour', completed: false };
     }
   };
@@ -171,6 +172,11 @@ export const Header: React.FC<HeaderProps> = ({
               </h1>
               <p className="text-xs xl:text-sm text-slate-400 font-mono uppercase tracking-wider">Detective Academy</p>
             </motion.div>
+
+            {/* Audio Waveform - Homepage Background Music */}
+            <div className="ml-4 hidden lg:flex">
+              <AudioWaveform className="detective-audio-control" />
+            </div>
           </div>
           
           {/* Center Navigation Menu - Hide on medium screens to save space */}
@@ -204,13 +210,13 @@ export const Header: React.FC<HeaderProps> = ({
                 <span>Training</span>
               </motion.button>
               
-              {/* Admin Access - Only show for authorized admins */}
+              {/* Admin Access - Only show for authorized admins (Desktop only) */}
               {currentUser && isAdminEmail(currentUser.email || '') && (
                 <motion.button 
-                  onClick={() => window.location.href = '/admin'}
+                  onClick={() => window.open('/admin', '_blank')}
                   whileHover={{ scale: 1.05, y: -1 }}
                   whileTap={{ scale: 0.95 }}
-                  className="flex items-center justify-center space-x-2 text-slate-300 hover:text-red-300 transition-colors font-medium px-6 py-3 rounded-lg hover:bg-red-800/20 border border-transparent hover:border-red-400/20 whitespace-nowrap"
+                  className="hidden md:flex items-center justify-center space-x-2 text-slate-300 hover:text-red-300 transition-colors font-medium px-6 py-3 rounded-lg hover:bg-red-800/20 border border-transparent hover:border-red-400/20 whitespace-nowrap"
                 >
                   <Shield className="w-4 h-4" />
                   <span>Admin Panel</span>
@@ -441,6 +447,12 @@ export const Header: React.FC<HeaderProps> = ({
               <BookOpen className="w-4 h-4" />
               <span>Learn</span>
             </button>
+
+            {/* Mobile Audio Controls */}
+            <div className="flex items-center justify-between w-full py-3 px-2">
+              <span className="theme-text-secondary text-sm">Background Music</span>
+              <AudioWaveform className="detective-audio-control-mobile" />
+            </div>
             
             {/* Mobile Dynamic Help Tour Button */}
             {currentUser && (

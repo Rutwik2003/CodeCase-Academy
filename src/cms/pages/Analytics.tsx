@@ -384,20 +384,20 @@ const Analytics: React.FC = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
         <div>
-          <h1 className="text-2xl font-bold text-white mb-2">Analytics Dashboard</h1>
-          <p className="text-white/60">Comprehensive insights into platform performance and user engagement</p>
+          <h1 className="text-xl md:text-2xl font-bold text-white mb-2">Analytics Dashboard</h1>
+          <p className="text-white/60 text-sm md:text-base">Platform performance and user engagement insights</p>
         </div>
         
-        <div className="flex items-center space-x-3">
+        <div className="flex flex-wrap items-center gap-2 md:gap-3">
           {/* Time Range Selector */}
           <select
             value={timeRange}
             onChange={(e) => setTimeRange(e.target.value as any)}
-            className="bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 backdrop-blur-xl"
+            className="bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 backdrop-blur-xl text-xs md:text-sm"
             style={{
               backgroundImage: 'none',
               appearance: 'none',
@@ -415,28 +415,28 @@ const Analytics: React.FC = () => {
           <button
             onClick={handleRefresh}
             disabled={refreshing}
-            className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all border ${
+            className={`flex items-center space-x-1 md:space-x-2 px-3 md:px-4 py-2 rounded-lg transition-all border text-xs md:text-sm ${
               refreshing 
                 ? 'bg-blue-500/10 text-blue-400/50 border-blue-500/20 cursor-not-allowed' 
                 : 'bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 border-blue-500/30 hover:border-blue-500/50'
             }`}
           >
-            <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
-            <span>{refreshing ? 'Refreshing...' : 'Refresh'}</span>
+            <RefreshCw className={`w-3 h-3 md:w-4 md:h-4 ${refreshing ? 'animate-spin' : ''}`} />
+            <span className="hidden md:block">{refreshing ? 'Refreshing...' : 'Refresh'}</span>
           </button>
           
           <button
             onClick={exportData}
-            className="flex items-center space-x-2 px-4 py-2 bg-green-500/20 hover:bg-green-500/30 text-green-400 rounded-lg transition-colors border border-green-500/30"
+            className="flex items-center space-x-1 md:space-x-2 px-3 md:px-4 py-2 bg-green-500/20 hover:bg-green-500/30 text-green-400 rounded-lg transition-colors border border-green-500/30 text-xs md:text-sm"
           >
-            <Download className="w-4 h-4" />
-            <span>Export JSON</span>
+            <Download className="w-3 h-3 md:w-4 md:h-4" />
+            <span className="hidden md:block">Export JSON</span>
           </button>
         </div>
       </div>
 
       {/* Overview Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
         {[
           {
             title: 'Total Users',

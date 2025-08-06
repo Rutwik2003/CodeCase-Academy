@@ -130,6 +130,22 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
 
   const currentStepData = onboardingSteps[currentStep];
 
+  // Prevent body scroll when modal is open
+  useEffect(() => {
+    if (isOpen) {
+      // Save original styles
+      const originalStyle = window.getComputedStyle(document.body).overflow;
+      
+      // Prevent body scroll
+      document.body.style.overflow = 'hidden';
+      
+      // Cleanup function to restore original style
+      return () => {
+        document.body.style.overflow = originalStyle;
+      };
+    }
+  }, [isOpen]);
+
   // Auto-close modal when clicking outside
   const handleBackdropClick = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget) {

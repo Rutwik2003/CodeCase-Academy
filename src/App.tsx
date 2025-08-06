@@ -56,7 +56,14 @@ function AppContent() {
       if (result.isRepeat) {
         addToast(`Case already solved! No additional points awarded - try other cases to earn more points.`, 'info');
       } else {
-        addToast(`Case ${caseId} completed! Earned ${result.pointsAwarded} points.`, 'success');
+        let message = `Case ${caseId} completed! Earned ${result.pointsAwarded} points.`;
+        
+        // Add hint bonus message for tutorial completion
+        if (caseId === 'case-tutorial') {
+          message += ` 🎁 Bonus: +2 hint points for completing your first tutorial!`;
+        }
+        
+        addToast(message, 'success');
       }
     } else {
       addToast(`Case ${caseId} completed! Earned ${score} points.`, 'success');

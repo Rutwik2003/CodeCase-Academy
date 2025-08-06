@@ -5,13 +5,13 @@ import { logger, LogCategory } from '../../utils/logger';
 
 // Admin user emails - you can modify this list
 const ADMIN_EMAILS = [
-  'rutwik@gmail.com',
-  'vasanth@gmail.com', // Add more admin emails as needed
+  'rutwiksunilbutani@gmail.com',
+  'testadminuser1@gmail.com', // Add more admin emails as needed
 ];
 
 // Super admin emails - these users can manage other admins
 const SUPER_ADMIN_EMAILS = [
-  'rutwik@gmail.com', // Primary super admin
+  'rutwiksunilbutani@gmail.com', // Primary super admin
 ];
 
 // Admin roles for more granular permissions
@@ -51,28 +51,48 @@ export const isSuperAdminEmail = (email: string): boolean => {
   return SUPER_ADMIN_EMAILS.includes(email.toLowerCase());
 };
 
-// Initialize super admin in Firestore
-export const initializeSuperAdmin = async (user: User): Promise<void> => {
-  if (!user.email || !isSuperAdminEmail(user.email)) return;
+// Initialize admin access when user signs up for the first time
+export const initializeAdminAccess = async (user: User): Promise<void> => {
+  if (!user.email) return;
   
   try {
-    const adminDoc = await getDoc(doc(db, 'admins', user.uid));
+    // Check if user is in the admin emails list
+    if (!isAdminEmail(user.email)) return;
     
-    // If admin document doesn't exist, create it
-    if (!adminDoc.exists()) {
-      await setDoc(doc(db, 'admins', user.uid), {
-        email: user.email.toLowerCase(),
-        role: AdminRole.SUPER_ADMIN,
-        permissions: Object.values(AdminPermission),
-        isActive: true,
-        createdAt: Timestamp.now(),
-        lastLogin: Timestamp.now(),
-        createdBy: 'system'
-      });
-      logger.info(LogCategory.CMS, 'Super admin initialized:', user.email);
+    // Check if admin document already exists
+    const adminDoc = await getDoc(doc(db, 'admins', user.uid));
+    if (adminDoc.exists()) return; // Already set up
+    
+    // Check if user is preapproved
+    const emailDocId = user.email.replace('@', '_at_').replace('.', '_dot_');
+    const preapprovedDoc = await getDoc(doc(db, 'admin_preapproved', emailDocId));
+    
+    let adminRole = AdminRole.CONTENT_MANAGER;
+    let permissions = getRolePermissions(AdminRole.CONTENT_MANAGER);
+    
+    if (preapprovedDoc.exists()) {
+      const preapprovedData = preapprovedDoc.data();
+      adminRole = preapprovedData.role || AdminRole.CONTENT_MANAGER;
+      permissions = preapprovedData.permissions || getRolePermissions(adminRole);
+    } else if (isSuperAdminEmail(user.email)) {
+      adminRole = AdminRole.SUPER_ADMIN;
+      permissions = Object.values(AdminPermission);
     }
+    
+    // Create admin document
+    await setDoc(doc(db, 'admins', user.uid), {
+      email: user.email.toLowerCase(),
+      role: adminRole,
+      permissions: permissions,
+      isActive: true,
+      createdAt: Timestamp.now(),
+      lastLogin: Timestamp.now(),
+      createdBy: 'system'
+    });
+    
+    logger.info(LogCategory.CMS, `Admin access initialized for: ${user.email}`);
   } catch (error) {
-    logger.error(LogCategory.CMS, 'Error initializing super admin:', error);
+    logger.error(LogCategory.CMS, 'Error initializing admin access:', error);
   }
 };
 
@@ -84,8 +104,8 @@ export const checkAdminAccess = async (user: User): Promise<boolean> => {
   if (!isAdminEmail(user.email)) return false;
   
   try {
-    // Initialize super admin if needed
-    await initializeSuperAdmin(user);
+    // Initialize admin access if needed
+    await initializeAdminAccess(user);
     
     // Check if admin document exists in Firestore
     const adminDoc = await getDoc(doc(db, 'admins', user.uid));

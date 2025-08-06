@@ -9,9 +9,10 @@ import {
   signInWithPopup,
   GoogleAuthProvider
 } from 'firebase/auth';
-import { doc, setDoc, getDoc, updateDoc, collection, query, where, getDocs, Timestamp } from 'firebase/firestore';
+import { doc, setDoc, getDoc, updateDoc, collection, query, where, getDocs, Timestamp, serverTimestamp } from 'firebase/firestore';
 import { logEvent } from 'firebase/analytics';
 import { auth, db, analytics } from '../config/firebase';
+import { initializeAdminAccess } from '../cms/utils/adminAuth';
 import toast from 'react-hot-toast';
 import { logger, LogCategory } from '../utils/logger';
 
@@ -93,7 +94,7 @@ interface AuthContextType {
   currentUser: User | null;
   userData: UserData | null;
   login: (email: string, password: string) => Promise<void>;
-  loginWithGoogle: () => Promise<void>;
+  loginWithGoogle: (referralCode?: string) => Promise<void>;
   register: (email: string, password: string, displayName: string, referralCode?: string) => Promise<void>;
   logout: () => Promise<void>;
   updateUserData: (updates: Partial<UserData>) => Promise<void>;
@@ -602,7 +603,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   // Login with Google
-  const loginWithGoogle = async () => {
+  const loginWithGoogle = async (referralCode?: string) => {
     try {
       const provider = new GoogleAuthProvider();
       provider.addScope('email');
@@ -615,15 +616,54 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const userDoc = await getDoc(doc(db, 'users', user.uid));
       
       if (!userDoc.exists()) {
-        // Create new user data for Google sign-in
+        // Create new user data for Google sign-in with referral support
         const displayName = user.displayName || user.email?.split('@')[0] || 'Google User';
-        await createUserData(user, displayName);
+        
+        // Process referral code if provided
+        let validReferral = false;
+        if (referralCode) {
+          const result = await processReferral(referralCode);
+          if (result.success) {
+            validReferral = true;
+          }
+        }
+        
+        await createUserData(user, displayName, validReferral ? referralCode : undefined);
+        
+        // Process referral rewards if valid referral (same logic as regular signup)
+        if (validReferral && referralCode) {
+          try {
+            // Get referrer data for rewards
+            const usersRef = collection(db, 'users');
+            const q = query(usersRef, where('referralCode', '==', referralCode.toUpperCase()));
+            const querySnapshot = await getDocs(q);
+            if (!querySnapshot.empty) {
+              const referrerDoc = querySnapshot.docs[0];
+              const referrerData = referrerDoc.data() as UserData;
+              
+              // Update referrer's stats and give rewards
+              const newReferralCount = (referrerData.referralStats?.totalReferrals || 0) + 1;
+              const bonusHints = Math.floor(newReferralCount / 5); // Bonus hint every 5 referrals
+              
+              await updateDoc(referrerDoc.ref, {
+                'referralStats.totalReferrals': newReferralCount,
+                'referralStats.successfulReferrals': (referrerData.referralStats?.successfulReferrals || 0) + 1,
+                'referralStats.lastReferralDate': serverTimestamp(),
+                hints: (referrerData.hints || 0) + 1 + bonusHints,
+                totalPoints: (referrerData.totalPoints || 0) + 100 + (bonusHints * 50)
+              });
+            }
+          } catch (error) {
+            // logger.error('Error processing Google login referral rewards:', error, LogCategory.AUTH); // COMMENTED FOR PRODUCTION
+          }
+        }
       }
       
       // Track login event
       if (analytics) {
         logEvent(analytics, 'login', {
-          method: 'google'
+          method: 'google',
+          referral_used: !!referralCode
         });
       }
     } catch (error) {
@@ -735,6 +775,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const pointsToAward = shouldAwardPoints ? points : 0;
       const newTotalPoints = userData.totalPoints + pointsToAward;
       const newLevel = Math.floor(newTotalPoints / 1000) + 1;
+      
+      // Tutorial completion rewards: Award 2 bonus hint points for first tutorial completion
+      let bonusHints = 0;
+      if (!alreadyCompleted && caseId === 'case-tutorial') {
+        bonusHints = 2; // Award 2 hint points for completing tutorial
+      }
+      
+      const newHints = userData.hints + bonusHints;
       
       // Update statistics - only count as "completed" if it's first time
       const shouldUpdateStats = !alreadyCompleted;
@@ -933,6 +981,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         completedCases: newCompletedCases,
         totalPoints: newTotalPoints,
         level: newLevel,
+        hints: newHints,
         statistics: updatedStatistics,
         evidence: updatedEvidence
       };
@@ -1030,6 +1079,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       if (user) {
         // logger.info('👤 Loading user data for:', user.uid, LogCategory.AUTH); // COMMENTED FOR PRODUCTION
         await loadUserData(user);
+        
+        // Initialize admin access if user is an admin
+        await initializeAdminAccess(user);
       } else {
         // logger.info('🚪 User logged out, clearing data', LogCategory.AUTH); // COMMENTED FOR PRODUCTION
         setUserData(null);

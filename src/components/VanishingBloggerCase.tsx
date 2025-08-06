@@ -1,6 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Star, Search, ChevronRight, Badge, Trophy, Lightbulb } from 'lucide-react';
 import { Toast } from './Toast';
+import { showAlert, showConfirm, alertManager } from './CustomAlert';
+import { useAuth } from '../contexts/AuthContext';
+import { AudioWaveform } from './AudioWaveform';
 
 // Import character images
 import policeGuyImg from '/assets/police_guy.jpeg';
@@ -47,11 +50,39 @@ export const VanishingBloggerCase: React.FC<VanishingBloggerCaseProps> = ({
   onBack,
   onComplete
 }) => {
+  // Auth context for hint points
+  const { userData, updateUserData } = useAuth();
+  
   // Game state
   const [currentScene, setCurrentScene] = useState<GameScene>('introduction');
   const [, setActiveItem] = useState<InvestigationItem>(null);
   const [toastMessage, setToastMessage] = useState('');
   const [hintsUsed, setHintsUsed] = useState(0);
+  
+  // Persistent hint system - tracks which hints are unlocked for each puzzle
+  const [unlockedHints, setUnlockedHints] = useState<{[puzzleId: string]: boolean}>({});
+  const [showHintPanel, setShowHintPanel] = useState(false);
+
+  // Load unlocked hints from localStorage on component mount
+  useEffect(() => {
+    if (userData?.uid) {
+      const savedHints = localStorage.getItem(`vanishingBloggerUnlockedHints_${userData.uid}`);
+      if (savedHints) {
+        try {
+          setUnlockedHints(JSON.parse(savedHints));
+        } catch (error) {
+          console.error('Error loading saved hints:', error);
+        }
+      }
+    }
+  }, [userData?.uid]);
+
+  // Save unlocked hints to localStorage whenever they change
+  useEffect(() => {
+    if (userData?.uid && Object.keys(unlockedHints).length > 0) {
+      localStorage.setItem(`vanishingBloggerUnlockedHints_${userData.uid}`, JSON.stringify(unlockedHints));
+    }
+  }, [unlockedHints, userData?.uid]);
 
   // Evidence and puzzles state
   const [puzzles, setPuzzles] = useState<CodePuzzle[]>([
@@ -302,51 +333,125 @@ export const VanishingBloggerCase: React.FC<VanishingBloggerCaseProps> = ({
   const handleHint = () => {
     if (!currentPuzzle) return;
     
+    // Check if hint is already unlocked for this puzzle
+    if (unlockedHints[currentPuzzle.id]) {
+      // Hint already unlocked, just show the hint panel
+      setShowHintPanel(true);
+      showToast(`💡 Viewing unlocked hint for ${currentPuzzle.name}`);
+      return;
+    }
+    
+    // Check if user has enough hint points to unlock
+    const hintCost = 1; // Cost 1 hint point to unlock a hint
+    if (!userData || userData.hints < hintCost) {
+      showAlert(`Not enough hint points! You need ${hintCost} hint point but only have ${userData?.hints || 0}. Complete tutorials or daily logins to earn more hints.`, {
+        title: "💡 Insufficient Hint Points",
+        type: "warning"
+      });
+      return;
+    }
+    
+    // Deduct hint points and unlock the hint permanently for this puzzle
+    updateUserData({
+      hints: userData.hints - hintCost,
+      totalPoints: userData.totalPoints // Don't change total points for buying hints
+    });
+    
+    // Mark hint as unlocked for this puzzle
+    setUnlockedHints(prev => ({
+      ...prev,
+      [currentPuzzle.id]: true
+    }));
+    
     setHintsUsed(prev => prev + 1);
+    setShowHintPanel(true);
+    
+    showToast(`💡 Hint unlocked for ${currentPuzzle.name}! Click the hint guy anytime to view it.`);
+  };
+
+  // Get hint content for current puzzle
+  const getCurrentHintContent = () => {
+    if (!currentPuzzle) return null;
     
     const detailedHints = {
       laptop: {
         hint: "The blog draft is hidden! Look for the CSS 'display' property and change it from 'none' to 'block' to reveal the content.",
-        explanation: "Web developers often hide elements using 'display: none'. Change it to 'display: block' to make it visible."
+        explanation: "Web developers often hide elements using 'display: none'. Change it to 'display: block' to make it visible.",
+        technical: "In CSS, 'display: none' completely removes an element from the page layout. To make it visible again, change it to 'display: block' or another appropriate display value."
       },
       phone: {
         hint: "The message is misaligned! The flex container needs 'flex-direction: column' and proper alignment with 'align-items: center' and 'justify-content: center'.",
-        explanation: "Flexbox layout is broken. Fix the direction and alignment properties to center the content properly."
+        explanation: "Flexbox layout is broken. Fix the direction and alignment properties to center the content properly.",
+        technical: "Flexbox properties: 'flex-direction' controls the main axis direction, 'align-items' aligns on the cross axis, and 'justify-content' aligns on the main axis."
       },
       notebook: {
         hint: "The secret plan is hidden outside the container! Change 'overflow: hidden' to 'overflow: visible' and reset the position values to 0px.",
-        explanation: "Content is positioned outside the visible area. Fix the overflow and positioning to reveal the hidden text."
+        explanation: "Content is positioned outside the visible area. Fix the overflow and positioning to reveal the hidden text.",
+        technical: "When 'overflow: hidden' is set, content outside the container boundaries is clipped. Change to 'overflow: visible' to show all content."
       },
       desktop: {
         hint: "The file grid has no height! Change 'grid-auto-rows: 0px' to 'grid-auto-rows: minmax(100px, auto)' to give the grid items proper height.",
-        explanation: "CSS Grid items have zero height. Set a minimum height using minmax() to make them visible."
+        explanation: "CSS Grid items have zero height. Set a minimum height using minmax() to make them visible.",
+        technical: "The 'grid-auto-rows' property with '0px' gives grid items no height. Use 'minmax(100px, auto)' to set a minimum height while allowing content to expand."
       }
     };
     
-    const currentHint = detailedHints[currentPuzzle.id as keyof typeof detailedHints];
-    showToast(`💡 Detective Hint: ${currentHint.hint}`);
+    return detailedHints[currentPuzzle.id as keyof typeof detailedHints];
+  };
+
+  // Handle exit case with confirmation
+  const handleExitCase = async (event?: React.MouseEvent) => {
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
     
-    // Show hint guy dialogue with explanation
-    showCharacterDialogue('hint', currentHint.explanation);
+    try {
+      const unlockedCount = Object.values(unlockedHints).filter(Boolean).length;
+      const hintMessage = unlockedCount > 0 
+        ? `You have ${unlockedCount} unlocked hint(s) that will be saved for when you return.`
+        : 'Your progress will be saved.';
+      
+      const confirmed = await alertManager.show({
+        message: `Are you sure you want to exit this case? ${hintMessage}`,
+        title: '🚪 Exit Case?',
+        confirmText: 'Yes, Exit Case',
+        cancelText: 'Continue Playing',
+        showCancel: true,
+        type: 'warning'
+      });
+      
+      if (confirmed) {
+        onBack();
+      }
+    } catch (error) {
+      console.error('Error in exit confirmation:', error);
+      // Fallback to simple alert if custom modal fails
+      const fallbackConfirmed = window.confirm('Exit case? Your progress will be saved.');
+      if (fallbackConfirmed) {
+        onBack();
+      }
+    }
   };
 
   const completeCase = () => {
     const finalScore = calculateFinalScore();
+    
+    // Clear unlocked hints from localStorage since case is completed
+    if (userData?.uid) {
+      localStorage.removeItem(`vanishingBloggerUnlockedHints_${userData.uid}`);
+    }
+    
     onComplete(finalScore);
   };
 
-  // Calculate final score with better hint penalty system
+  // Calculate final score - hints no longer reduce score since they cost hint points
   const calculateFinalScore = () => {
-    const basePoints = 1500; // Updated to match cases.ts
+    const basePoints = 1500; // Base points for completing the case
     const evidenceBonus = solvedPuzzles * 200; // 200 points per evidence found
     
-    // More reasonable hint penalty: max 30% penalty, only 5 points per hint
-    const hintPenalty = Math.min(hintsUsed * 5, basePoints * 0.3);
-    
-    // Guarantee minimum 70% of base score when all evidence is collected
-    const minScore = solvedPuzzles === 4 ? basePoints * 0.7 : basePoints * 0.5;
-    
-    const finalScore = Math.max(basePoints + evidenceBonus - hintPenalty, minScore);
+    // No hint penalty since hints now cost hint points directly
+    const finalScore = basePoints + evidenceBonus;
     return Math.round(finalScore);
   };
 
@@ -354,8 +459,7 @@ export const VanishingBloggerCase: React.FC<VanishingBloggerCaseProps> = ({
   const getCurrentScore = () => {
     const basePoints = 1500;
     const evidenceBonus = solvedPuzzles * 200;
-    const hintPenalty = Math.min(hintsUsed * 5, basePoints * 0.3);
-    return Math.max(basePoints + evidenceBonus - hintPenalty, 0);
+    return basePoints + evidenceBonus;
   };
 
   // Render different scenes
@@ -381,11 +485,11 @@ export const VanishingBloggerCase: React.FC<VanishingBloggerCaseProps> = ({
           
           <div className="flex items-center justify-between">
             <button
-              onClick={onBack}
-              className="flex items-center gap-2 px-6 py-3 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-lg transition-all duration-200"
+              onClick={handleExitCase}
+              className="flex items-center gap-2 px-6 py-3 bg-red-600/20 border border-red-500 text-red-400 rounded-lg transition-all duration-200 hover:bg-red-600/30"
             >
               <ArrowLeft className="w-5 h-5" />
-              Back to Cases
+              Exit Case
             </button>
             
             <button
@@ -432,8 +536,20 @@ export const VanishingBloggerCase: React.FC<VanishingBloggerCaseProps> = ({
             ))}
           </div>
           
-          <div className="text-center">
-            <p className="text-slate-300 mb-4">Click on the 3rd floor to enter Rishi's apartment</p>
+          
+          <div className="text-center mb-4">
+            <p className="text-slate-300">Click on the 3rd floor to enter Rishi's apartment</p>
+          </div>
+          
+          <div className="flex items-center justify-between">
+            <button
+              onClick={handleExitCase}
+              className="flex items-center gap-2 px-6 py-3 bg-red-600/20 border border-red-500 text-red-400 rounded-lg transition-all duration-200 hover:bg-red-600/30"
+            >
+              <ArrowLeft className="w-5 h-5" />
+              Exit Case
+            </button>
+            
             <button
               onClick={() => setCurrentScene('introduction')}
               className="px-6 py-2 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-lg transition-all duration-200"
@@ -486,6 +602,20 @@ export const VanishingBloggerCase: React.FC<VanishingBloggerCaseProps> = ({
               <Search className="w-4 h-4 text-blue-400" />
               <span>Hints: {hintsUsed}</span>
             </div>
+            
+            {/* Audio Waveform */}
+            <div className="border-l border-slate-600 pl-4">
+              <AudioWaveform className="detective-audio-control" />
+            </div>
+            
+            {/* Exit Case Button */}
+            <button
+              onClick={handleExitCase}
+              className="flex items-center gap-2 px-3 py-2 bg-red-600/20 border border-red-500 text-red-400 rounded-lg text-xs font-medium transition-all duration-300 hover:bg-red-600/30 ml-4"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span>Exit Case</span>
+            </button>
           </div>
         </div>
         
@@ -679,12 +809,52 @@ export const VanishingBloggerCase: React.FC<VanishingBloggerCaseProps> = ({
                 <span>{getCurrentScore().toLocaleString()}</span>
               </div>
               
-              <button
+              <div className="flex items-center gap-2 text-sm text-slate-300 bg-slate-800/30 px-3 py-1 rounded-lg">
+                <Lightbulb className="w-4 h-4 text-amber-400" />
+                <span>{userData?.hints || 0}</span>
+              </div>
+              
+              {/* Unified Interactive Hint Guy Button */}
+              <button 
                 onClick={handleHint}
-                className="flex items-center gap-2 px-4 py-2 bg-amber-600 hover:bg-amber-500 text-white rounded-lg font-medium transition-all duration-200"
+                disabled={!userData || (userData.hints < 1 && !unlockedHints[currentPuzzle?.id])}
+                className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-300 ${
+                  unlockedHints[currentPuzzle?.id] 
+                    ? 'bg-green-400/20 border border-green-400 text-green-400 hover:bg-green-400/30' 
+                    : userData && userData.hints >= 1 
+                      ? 'bg-amber-400/20 border border-amber-400 text-amber-400 hover:bg-amber-400/30' 
+                      : 'bg-gray-500/20 border border-gray-500 text-gray-500 cursor-not-allowed'
+                }`}
               >
-                <Search className="w-4 h-4" />
-                Get Hint ({hintsUsed} used)
+                <div className="relative">
+                  <img 
+                    src={hintGuyImg} 
+                    alt="Detective Helper" 
+                    className="w-8 h-8 rounded-full border border-white/20 object-cover"
+                  />
+                  {unlockedHints[currentPuzzle?.id] && (
+                    <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full flex items-center justify-center">
+                      <span className="text-xs text-slate-900">✓</span>
+                    </div>
+                  )}
+                </div>
+                <div className="text-center">
+                  <div className="font-medium">
+                    {unlockedHints[currentPuzzle?.id] ? 'Hint Ready!' : 'Need Help?'}
+                  </div>
+                  <div className="text-xs opacity-80">
+                    {unlockedHints[currentPuzzle?.id] ? 'Click to view' : 'Click for hint'}
+                  </div>
+                </div>
+              </button>
+
+              {/* Exit Case Button */}
+              <button
+                onClick={handleExitCase}
+                className="flex items-center gap-2 px-3 py-2 bg-red-600/20 border border-red-500 text-red-400 rounded-lg text-xs font-medium transition-all duration-300 hover:bg-red-600/30"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                <span>Exit Case</span>
               </button>
             </div>
           </div>
@@ -697,16 +867,39 @@ export const VanishingBloggerCase: React.FC<VanishingBloggerCaseProps> = ({
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-bold text-amber-400">Fix the Code to Reveal Evidence</h3>
                 
-                {/* Hint Guy in Investigation */}
-                <div className="flex items-center gap-4">
-                  <img 
-                    src={hintGuyImg} 
-                    alt="Hint Guy" 
-                    className="w-12 h-12 rounded-full border-2 border-amber-500/50 object-cover cursor-pointer hover:border-amber-400 transition-all duration-200"
-                    onClick={handleHint}
-                    title="Click for a hint!"
-                  />
-                </div>
+                {/* Unified Interactive Hint Guy Button in Investigation */}
+                <button 
+                  onClick={handleHint}
+                  disabled={!userData || (userData.hints < 1 && !unlockedHints[currentPuzzle?.id])}
+                  className={`flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${
+                    unlockedHints[currentPuzzle?.id] 
+                      ? 'bg-green-400/20 border border-green-400 text-green-400 hover:bg-green-400/30' 
+                      : userData && userData.hints >= 1 
+                        ? 'bg-amber-400/20 border border-amber-400 text-amber-400 hover:bg-amber-400/30' 
+                        : 'bg-gray-500/20 border border-gray-500 text-gray-500 cursor-not-allowed'
+                  }`}
+                >
+                  <div className="relative">
+                    <img 
+                      src={hintGuyImg} 
+                      alt="Detective Helper" 
+                      className="w-12 h-12 rounded-full border border-white/20 object-cover"
+                    />
+                    {unlockedHints[currentPuzzle?.id] && (
+                      <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-400 rounded-full flex items-center justify-center">
+                        <span className="text-xs text-slate-900">✓</span>
+                      </div>
+                    )}
+                  </div>
+                  <div className="text-center">
+                    <div className="font-medium">
+                      {unlockedHints[currentPuzzle?.id] ? 'Hint Ready!' : 'Need Help?'}
+                    </div>
+                    <div className="text-xs opacity-80">
+                      {unlockedHints[currentPuzzle?.id] ? 'Click to view' : 'Click for hint'}
+                    </div>
+                  </div>
+                </button>
               </div>
 
               {/* Problem Statement */}
@@ -741,13 +934,6 @@ export const VanishingBloggerCase: React.FC<VanishingBloggerCaseProps> = ({
                     className="px-6 py-2 bg-slate-600 hover:bg-slate-500 text-slate-200 rounded-lg font-medium transition-all duration-200"
                   >
                     ↺ Reset Code
-                  </button>
-
-                  <button
-                    onClick={handleHint}
-                    className="px-6 py-2 bg-amber-600 hover:bg-amber-500 text-white rounded-lg font-medium transition-all duration-200"
-                  >
-                    💡 Get Hint ({hintsUsed} used)
                   </button>
                 </div>
               </div>
@@ -918,6 +1104,50 @@ export const VanishingBloggerCase: React.FC<VanishingBloggerCaseProps> = ({
                 </div>
               </div>
             </div>
+
+            {/* Persistent Hint Panel */}
+            {showHintPanel && unlockedHints[currentPuzzle?.id] && (
+              <div className="mt-6 bg-gradient-to-r from-amber-500/10 via-amber-600/10 to-orange-500/10 rounded-lg border border-amber-500/30 p-6 relative">
+                <button
+                  onClick={() => setShowHintPanel(false)}
+                  className="absolute top-3 right-3 text-amber-400 hover:text-amber-300 text-xl font-bold"
+                >
+                  ×
+                </button>
+                
+                <div className="flex items-start gap-4">
+                  <img 
+                    src={hintGuyImg} 
+                    alt="Detective Helper" 
+                    className="w-16 h-16 rounded-full border-2 border-amber-400 object-cover flex-shrink-0"
+                  />
+                  <div className="flex-1">
+                    <h3 className="text-lg font-bold text-amber-400 mb-3 flex items-center gap-2">
+                      💡 Detective's Hint <span className="text-sm font-normal text-green-400">(Unlocked)</span>
+                    </h3>
+                    {(() => {
+                      const hintContent = getCurrentHintContent();
+                      return hintContent ? (
+                        <div className="space-y-3">
+                          <div className="bg-slate-800/50 rounded-lg p-4 border border-amber-500/20">
+                            <h4 className="text-amber-300 font-semibold mb-2">🔍 Quick Hint:</h4>
+                            <p className="text-slate-200">{hintContent.hint}</p>
+                          </div>
+                          <div className="bg-slate-800/50 rounded-lg p-4 border border-amber-500/20">
+                            <h4 className="text-amber-300 font-semibold mb-2">📖 Explanation:</h4>
+                            <p className="text-slate-200">{hintContent.explanation}</p>
+                          </div>
+                          <div className="bg-slate-800/50 rounded-lg p-4 border border-amber-500/20">
+                            <h4 className="text-amber-300 font-semibold mb-2">🎓 Technical Details:</h4>
+                            <p className="text-slate-200">{hintContent.technical}</p>
+                          </div>
+                        </div>
+                      ) : null;
+                    })()}
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -1074,15 +1304,25 @@ export const VanishingBloggerCase: React.FC<VanishingBloggerCaseProps> = ({
           </div>
         </div>
         
-        {/* Bottom Action - Full Width */}
-        <div className="text-center pb-8">
-          <button
-            onClick={completeCase}
-            className="px-12 py-4 bg-gradient-to-r from-green-600 to-green-500 hover:from-green-700 hover:to-green-600 text-white text-lg rounded-xl font-semibold transition-all duration-200 shadow-lg flex items-center gap-3 mx-auto hover:scale-105"
-          >
-            <Trophy className="w-5 h-5" />
-            Complete Investigation
-          </button>
+        {/* Bottom Actions - Full Width */}
+        <div className="text-center pb-8 space-y-4">
+          <div className="flex items-center justify-center gap-4">
+            <button
+              onClick={handleExitCase}
+              className="flex items-center gap-2 px-6 py-3 bg-red-600/20 border border-red-500 text-red-400 rounded-lg transition-all duration-200 hover:bg-red-600/30"
+            >
+              <ArrowLeft className="w-5 h-5" />
+              Exit Without Claiming Rewards
+            </button>
+            
+            <button
+              onClick={completeCase}
+              className="px-12 py-4 bg-gradient-to-r from-green-600 to-green-500 hover:from-green-700 hover:to-green-600 text-white text-lg rounded-xl font-semibold transition-all duration-200 shadow-lg flex items-center gap-3 hover:scale-105"
+            >
+              <Trophy className="w-5 h-5" />
+              Complete Investigation & Claim Rewards
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -1107,8 +1347,9 @@ export const VanishingBloggerCase: React.FC<VanishingBloggerCaseProps> = ({
   };
 
   return (
-    <div className="relative">
-      {renderCurrentScene()}
+    <>
+      <div className="relative">
+        {renderCurrentScene()}
 
       {/* Character Dialogue Overlay */}
       {showDialogue && (
@@ -1127,5 +1368,6 @@ export const VanishingBloggerCase: React.FC<VanishingBloggerCaseProps> = ({
         />
       )}
     </div>
+    </>
   );
 };

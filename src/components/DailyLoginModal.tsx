@@ -77,11 +77,14 @@ export const DailyLoginModal: React.FC<DailyLoginModalProps> = ({ isOpen, onClos
     
     const hours = Math.floor(diff / (1000 * 60 * 60));
     const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
     
     if (hours > 0) {
       return `${hours}h ${minutes}m`;
+    } else if (minutes > 0) {
+      return `${minutes}m ${seconds}s`;
     } else {
-      return `${minutes}m`;
+      return `${seconds}s`;
     }
   };
 
@@ -125,13 +128,22 @@ export const DailyLoginModal: React.FC<DailyLoginModalProps> = ({ isOpen, onClos
       setCanClaimToday(canClaim);
       setTodaysClaimed(alreadyClaimed);
       setNextClaimTime(nextClaim);
+      
+      // Set initial countdown time immediately
+      if (nextClaim) {
+        setTimeUntilNextClaim(formatTimeRemaining(nextClaim));
+      } else {
+        setTimeUntilNextClaim('');
+      }
     }
   }, [userData, isOpen]);
 
-  // Update countdown timer
+  // Update countdown timer - runs continuously when modal is open
   useEffect(() => {
-    if (nextClaimTime) {
-      const interval = setInterval(() => {
+    if (!isOpen) return;
+
+    const updateTimer = () => {
+      if (nextClaimTime) {
         const remaining = formatTimeRemaining(nextClaimTime);
         setTimeUntilNextClaim(remaining);
         
@@ -142,11 +154,49 @@ export const DailyLoginModal: React.FC<DailyLoginModalProps> = ({ isOpen, onClos
           setNextClaimTime(null);
           setTimeUntilNextClaim('');
         }
-      }, 1000);
+      } else if (userData && userData.lastClaimDate) {
+        // Calculate when next claim will be available
+        const lastClaim = userData.lastClaimDate instanceof Timestamp ? 
+          userData.lastClaimDate.toDate() : 
+          new Date(userData.lastClaimDate);
+        const nextClaim = new Date(lastClaim.getTime() + (24 * 60 * 60 * 1000));
+        const now = new Date();
+        
+        if (now < nextClaim) {
+          setTimeUntilNextClaim(formatTimeRemaining(nextClaim));
+          if (!nextClaimTime) {
+            setNextClaimTime(nextClaim);
+          }
+        } else {
+          setTimeUntilNextClaim('');
+        }
+      }
+    };
 
-      return () => clearInterval(interval);
+    // Update immediately
+    updateTimer();
+    
+    // Then update every second
+    const interval = setInterval(updateTimer, 1000);
+
+    return () => clearInterval(interval);
+  }, [nextClaimTime, isOpen, userData]);
+
+  // Prevent body scroll when modal is open
+  useEffect(() => {
+    if (isOpen) {
+      // Save original styles
+      const originalStyle = window.getComputedStyle(document.body).overflow;
+      
+      // Prevent body scroll
+      document.body.style.overflow = 'hidden';
+      
+      // Cleanup function to restore original style
+      return () => {
+        document.body.style.overflow = originalStyle;
+      };
     }
-  }, [nextClaimTime]);
+  }, [isOpen]);
 
   const claimDailyReward = async () => {
     if (!userData || !canClaimToday || todaysClaimed || isLoading) return;
@@ -236,9 +286,10 @@ export const DailyLoginModal: React.FC<DailyLoginModalProps> = ({ isOpen, onClos
       setTodaysClaimed(true);
       setCanClaimToday(false);
       
-      // Set next claim time (24 hours from now)
+      // Set next claim time (24 hours from now) and start countdown immediately
       const nextClaim = new Date(now.getTime() + (24 * 60 * 60 * 1000));
       setNextClaimTime(nextClaim);
+      setTimeUntilNextClaim(formatTimeRemaining(nextClaim));
 
       toast.success(
         `Day ${newStreak} claimed! +${reward.amount} ${reward.type}${reward.type === 'achievement' ? ' + badge' : ''}`,
@@ -345,7 +396,7 @@ export const DailyLoginModal: React.FC<DailyLoginModalProps> = ({ isOpen, onClos
           </div>
 
           {/* Rewards Grid */}
-          <div className="p-3 sm:p-4 lg:p-6 overflow-y-auto max-h-[50vh] sm:max-h-[60vh]">
+          <div className="p-3 sm:p-4 lg:p-6 overflow-y-auto max-h-[50vh] sm:max-h-[60vh] custom-scrollbar">
             <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 xl:grid-cols-7 gap-2 sm:gap-3 lg:gap-4">
               {loginRewards.map((reward, index) => {
                 const isCompleted = currentStreak >= reward.day;

@@ -24,17 +24,13 @@ CodeCase Detective Academy is an innovative gamified learning platform that teac
 - **Referral Program**: Invite friends and earn rewards
 - **Daily Login Rewards**: Gamified engagement system
 
-### � URL Routing
+### 🌐 SEO & Performance
 - **Clean URLs**: `/training`, `/profile`, `/signin`, `/signup`
 - **Case URLs**: `/tutorialcase`, `/vanishingblogger`
-- **SEO Friendly**: Proper URL structure for search engines
+- **SEO Optimized**: Proper meta tags and structured data
 - **Browser Navigation**: Full back/forward button support
-
-### �🇮🇳 India-Focused
-- **Currency**: Indian Rupee (INR) support
-- **Timezone**: Asia/Kolkata optimization
-- **Language**: English (India) - en-IN
-- **SEO**: India-targeted search optimization
+- **Performance**: Optimized loading and responsive design
+- **Accessibility**: WCAG compliant design patterns
 
 ### 🚀 Modern Tech Stack
 - **Frontend**: React 18 + TypeScript + Vite
@@ -43,7 +39,40 @@ CodeCase Detective Academy is an innovative gamified learning platform that teac
 - **Analytics**: Google Analytics 4
 - **Deployment**: GitHub Actions + Vercel
 
-## 🚀 Quick Start
+## � Project Structure
+
+```
+codecase-detective-academy/
+├── 📂 src/                     # Source code
+│   ├── 📂 components/          # React components
+│   ├── 📂 pages/              # Page components
+│   ├── 📂 utils/              # Utility functions
+│   ├── 📂 hooks/              # Custom React hooks
+│   ├── 📂 store/              # State management
+│   └── 📂 types/              # TypeScript definitions
+├── 📂 public/                  # Static assets
+│   ├── 📂 assets/             # Images, audio files
+│   └── 📄 manifest.json       # PWA manifest
+├── 📂 docs/                    # 📚 Documentation
+│   ├── 📂 admin/              # Admin guides
+│   ├── 📂 deployment/         # Deployment guides
+│   ├── 📂 implementations/    # Feature docs
+│   ├── 📂 fixes/              # Bug fix reports
+│   ├── 📂 security/           # Security docs
+│   └── 📄 README.md           # Documentation index
+├── 📂 tools/                   # 🛠️ Development tools
+│   ├── 📂 scripts/            # PowerShell scripts
+│   ├── 📂 utilities/          # Node.js utilities
+│   └── 📄 README.md           # Tools documentation
+├── 📂 tests/                   # 🧪 Test files
+│   ├── 📄 firebase-test.js    # Firebase tests
+│   ├── 📄 oauth-test.html     # OAuth testing
+│   └── 📄 README.md           # Testing guide
+├── 📂 scripts/                 # Build & admin scripts
+└── 📄 README.md               # This file
+```
+
+## �🚀 Quick Start
 
 ### Prerequisites
 - Node.js 18+ 

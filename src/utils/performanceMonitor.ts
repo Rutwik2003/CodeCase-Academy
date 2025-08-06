@@ -15,7 +15,7 @@ interface PerformanceMetrics {
 class PerformanceMonitor {
   private metrics: Partial<PerformanceMetrics> = {};
   private observers: PerformanceObserver[] = [];
-  // private startTime = performance.now(); // Reserved for future session tracking
+  private startTime = performance.now();
 
   constructor() {
     this.initializeObservers();
@@ -189,8 +189,7 @@ class PerformanceMonitor {
   // Start monitoring session
   startSession(): void {
     const sessionStart = performance.now();
-    // this.startTime = sessionStart; // Commented out for now
-    console.debug('Session started at:', sessionStart);
+    this.startTime = sessionStart;
     
     // Monitor performance after page loads
     if (document.readyState === 'complete') {

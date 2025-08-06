@@ -3,7 +3,6 @@ import { X, Star, Lock, AlertTriangle, CheckCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useUnlockSystem } from '../contexts/UnlockSystemContext';
 import { useAuth } from '../contexts/AuthContext';
-import { logger, LogCategory } from '../utils/logger';
 
 interface UnlockCaseModalProps {
   isOpen: boolean;
@@ -55,15 +54,23 @@ export const UnlockCaseModal: React.FC<UnlockCaseModalProps> = ({
     if (!isOpen) {
       setIsUnlocking(false);
       setUnlockSuccess(false);
-    } else {
-      // Prevent body scroll when modal is open
-      document.body.style.overflow = 'hidden';
     }
-    
-    // Cleanup function to restore body scroll
-    return () => {
-      document.body.style.overflow = 'unset';
-    };
+  }, [isOpen]);
+
+  // Prevent body scroll when modal is open
+  useEffect(() => {
+    if (isOpen) {
+      // Save original styles
+      const originalStyle = window.getComputedStyle(document.body).overflow;
+      
+      // Prevent body scroll
+      document.body.style.overflow = 'hidden';
+      
+      // Cleanup function to restore original style
+      return () => {
+        document.body.style.overflow = originalStyle;
+      };
+    }
   }, [isOpen]);
 
   // Escape key handler

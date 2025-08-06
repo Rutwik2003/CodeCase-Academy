@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { AdminProvider, useAdmin } from './hooks/useAdmin';
-import CMSLayout from './components/CMSLayout';
+import SimpleCMSLayout from './components/SimpleCMSLayout';
 import Dashboard from './pages/Dashboard';
 import UserManagement from './pages/UserManagement';
 import CaseManagement from './pages/CaseManagementFixed';
@@ -11,10 +12,14 @@ import AdminUserManagement from './pages/AdminUserManagement';
 import LoggingManagement from './pages/LoggingManagement';
 import FeedbackManagement from './pages/FeedbackManagement';
 import MaintenanceMode from './pages/MaintenanceMode';
+import { GlobalAudioManager } from './components/GlobalAudioManager';
 import { Shield, AlertTriangle, Loader2, ArrowLeft, Clock, Eye } from 'lucide-react';
 
 // Access Denied Component
-const AccessDenied: React.FC = () => (
+const AccessDenied: React.FC = () => {
+  const navigate = useNavigate();
+  
+  return (
   <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center p-4 relative overflow-hidden">
     {/* Detective atmosphere background elements */}
     <div className="absolute inset-0 opacity-10">
@@ -148,7 +153,7 @@ const AccessDenied: React.FC = () => (
           transition={{ delay: 0.9 }}
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          onClick={() => window.location.href = '/'}
+          onClick={() => navigate('/')}
           className="bg-amber-600 hover:bg-amber-700 text-white px-8 py-3 rounded-lg transition-all duration-200 font-bold shadow-lg flex items-center space-x-2 mx-auto"
         >
           <ArrowLeft className="w-5 h-5" />
@@ -195,7 +200,8 @@ const AccessDenied: React.FC = () => (
       </motion.div>
     </div>
   </div>
-);
+  );
+};
 
 // Loading Component
 const CMSLoading: React.FC = () => (
@@ -295,6 +301,9 @@ const CMSContent: React.FC = () => {
             <p className="text-white/60">Activity monitoring coming soon...</p>
           </div>
         );
+      case 'audio':
+        console.log('Rendering audio management page');
+        return <GlobalAudioManager />;
       case 'system':
         return (
           <div className="bg-white/10 backdrop-blur-xl rounded-xl p-8 border border-white/20 text-center">
@@ -316,9 +325,9 @@ const CMSContent: React.FC = () => {
   };
 
   return (
-    <CMSLayout currentPage={currentPage} onPageChange={setCurrentPage}>
+    <SimpleCMSLayout currentPage={currentPage} onPageChange={setCurrentPage}>
       {renderPage()}
-    </CMSLayout>
+    </SimpleCMSLayout>
   );
 };
 

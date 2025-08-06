@@ -19,7 +19,7 @@ import {
   Search,
   Settings
 } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { professionalToast } from '../utils/professionalToast';
 import { logger, LogCategory } from '../../utils/logger';
 
 interface Mission {
@@ -317,17 +317,17 @@ const AdvancedCaseEditor: React.FC<AdvancedCaseEditorProps> = ({ case: editCase,
 
   const handleSave = () => {
     if (!caseData.title.trim()) {
-      toast.error('Please enter a case title');
+      professionalToast.warning('Title Required', 'Please enter a case title');
       return;
     }
 
     if (!caseData.description.trim()) {
-      toast.error('Please enter a case description');
+      professionalToast.warning('Description Required', 'Please enter a case description');
       return;
     }
 
     if (caseData.isDetectiveMission && caseData.missions.length === 0) {
-      toast.error('Detective cases need at least one mission');
+      professionalToast.warning('Missions Required', 'Detective cases need at least one mission');
       return;
     }
 
@@ -360,7 +360,7 @@ const AdvancedCaseEditor: React.FC<AdvancedCaseEditorProps> = ({ case: editCase,
     };
 
     onSave(convertedCase as any);
-    toast.success('Case saved successfully!');
+    professionalToast.success('Case Saved', 'Case has been saved successfully!');
   };
 
   const tabs = [
@@ -422,7 +422,7 @@ const AdvancedCaseEditor: React.FC<AdvancedCaseEditorProps> = ({ case: editCase,
       </div>
 
       {/* Tab Content */}
-      <div className="flex-1 overflow-y-auto p-6">
+      <div className="flex-1 overflow-y-auto p-6 custom-scrollbar">
         {activeTab === 'basic' && (
           <BasicInfoTab caseData={caseData} setCaseData={setCaseData} />
         )}

@@ -189,7 +189,8 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onBack }) => {
     setError('');
 
     try {
-      await loginWithGoogle();
+      // Pass referral code from form data if available
+      await loginWithGoogle(formData.referralCode || undefined);
       // Success! The useEffect will handle navigation when currentUser updates
     } catch (error: any) {
       if (error.message === 'Google sign-in was cancelled') {

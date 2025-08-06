@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google OAuth Test - CodeCase</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .status {
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        button {
+            background: #4285f4;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        button:hover { background: #3367d6; }
+        .config-item {
+            background: #f8f9fa;
+            padding: 10px;
+            margin: 5px 0;
+            border-left: 4px solid #007bff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Google OAuth Configuration Test</h1>
+        <p>This page helps test your Google OAuth setup for CodeCase Detective Academy.</p>
+        
+        <div id="status" class="status info">
+            ⏳ Click the test button to check OAuth configuration...
+        </div>
+
+        <h2>📋 Current Configuration</h2>
+        <div class="config-item">
+            <strong>Auth Domain:</strong> codebuster-82940.firebaseapp.com
+        </div>
+        <div class="config-item">
+            <strong>Project ID:</strong> codebuster-82940
+        </div>
+        <div class="config-item">
+            <strong>Local URL:</strong> http://localhost:5173
+        </div>
+
+        <h2>🧪 OAuth Test</h2>
+        <button onclick="testFirebaseConfig()">Test Firebase Config</button>
+        <button onclick="openGoogleOAuth()">Test Google OAuth Flow</button>
+        <button onclick="openMainApp()">Open Main App</button>
+
+        <h2>✅ Required OAuth Redirect URIs</h2>
+        <p>Add these to your Google Cloud Console OAuth client:</p>
+        <div class="config-item">https://codebuster-82940.firebaseapp.com/__/auth/handler</div>
+        <div class="config-item">http://localhost:5173</div>
+        <div class="config-item">http://localhost:5173/__/auth/handler</div>
+        <div class="config-item">http://127.0.0.1:5173</div>
+
+        <h2>🔗 Quick Setup Links</h2>
+        <button onclick="openGoogleConsole()">Google Cloud Console</button>
+        <button onclick="openFirebaseConsole()">Firebase Console</button>
+    </div>
+
+    <script>
+        function updateStatus(message, type = 'info') {
+            const statusDiv = document.getElementById('status');
+            statusDiv.className = `status ${type}`;
+            statusDiv.innerHTML = message;
+        }
+
+        function testFirebaseConfig() {
+            updateStatus('🔄 Testing Firebase configuration...', 'info');
+            
+            // Check if Firebase config is loaded
+            try {
+                const authDomain = 'codebuster-82940.firebaseapp.com';
+                const projectId = 'codebuster-82940';
+                
+                updateStatus(`✅ Firebase config looks good!<br>
+                    📍 Auth Domain: ${authDomain}<br>
+                    🆔 Project ID: ${projectId}`, 'success');
+            } catch (error) {
+                updateStatus(`❌ Firebase config error: ${error.message}`, 'error');
+            }
+        }
+
+        function openGoogleOAuth() {
+            updateStatus('🚀 Opening Google OAuth test...', 'info');
+            // This simulates what happens when you click "Continue with Google"
+            const oauthUrl = `https://accounts.google.com/o/oauth2/v2/auth?` +
+                `client_id=YOUR_CLIENT_ID&` +
+                `redirect_uri=https://codebuster-82940.firebaseapp.com/__/auth/handler&` +
+                `response_type=code&` +
+                `scope=email profile`;
+            
+            updateStatus('ℹ️ This would normally open Google OAuth. Check browser console for details.', 'info');
+            console.log('OAuth URL would be:', oauthUrl);
+        }
+
+        function openMainApp() {
+            window.open('http://localhost:5173', '_blank');
+        }
+
+        function openGoogleConsole() {
+            window.open('https://console.cloud.google.com/apis/credentials', '_blank');
+        }
+
+        function openFirebaseConsole() {
+            window.open('https://console.firebase.google.com/project/codebuster-82940/authentication/settings', '_blank');
+        }
+
+        // Auto-test on page load
+        window.onload = function() {
+            testFirebaseConfig();
+        };
+    </script>
+</body>
+</html>

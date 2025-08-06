@@ -286,7 +286,7 @@ const Dashboard: React.FC<{ onPageChange?: (page: string) => void }> = ({ onPage
       </motion.div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3 md:gap-6">
         {statCards.map((card, index) => {
           const Icon = card.icon;
           return (
@@ -295,20 +295,20 @@ const Dashboard: React.FC<{ onPageChange?: (page: string) => void }> = ({ onPage
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1 }}
-              className="bg-white/10 backdrop-blur-xl rounded-xl p-6 border border-white/20 hover:border-white/30 transition-all duration-200"
+              className="bg-white/10 backdrop-blur-xl rounded-xl p-4 md:p-6 border border-white/20 hover:border-white/30 transition-all duration-200"
             >
-              <div className="flex items-center justify-between mb-4">
-                <div className={`w-12 h-12 bg-gradient-to-br ${card.color} rounded-lg flex items-center justify-center`}>
-                  <Icon className="w-6 h-6 text-white" />
+              <div className="flex items-center justify-between mb-3 md:mb-4">
+                <div className={`w-10 h-10 md:w-12 md:h-12 bg-gradient-to-br ${card.color} rounded-lg flex items-center justify-center`}>
+                  <Icon className="w-5 h-5 md:w-6 md:h-6 text-white" />
                 </div>
                 <div className="text-right">
-                  <p className="text-white/60 text-sm">{card.title}</p>
-                  <p className="text-2xl font-bold text-white">{card.value}</p>
+                  <p className="text-white/60 text-xs md:text-sm">{card.title}</p>
+                  <p className="text-lg md:text-2xl font-bold text-white">{card.value}</p>
                 </div>
               </div>
               <div className="flex items-center justify-between">
-                <span className={`text-sm ${card.changeColor}`}>{card.change}</span>
-                <Eye className="w-4 h-4 text-white/40" />
+                <span className={`text-xs md:text-sm ${card.changeColor}`}>{card.change}</span>
+                <Eye className="w-3 h-3 md:w-4 md:h-4 text-white/40" />
               </div>
             </motion.div>
           );
@@ -316,33 +316,33 @@ const Dashboard: React.FC<{ onPageChange?: (page: string) => void }> = ({ onPage
       </div>
 
       {/* Activity and Quick Actions */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 md:gap-6">
         {/* Recent Activity */}
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.3 }}
-          className="bg-white/10 backdrop-blur-xl rounded-xl p-6 border border-white/20"
+          className="bg-white/10 backdrop-blur-xl rounded-xl p-4 md:p-6 border border-white/20"
         >
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-semibold text-white">Recent Activity</h3>
-            <Activity className="w-5 h-5 text-white/60" />
+          <div className="flex items-center justify-between mb-4 md:mb-6">
+            <h3 className="text-base md:text-lg font-semibold text-white">Recent Activity</h3>
+            <Activity className="w-4 h-4 md:w-5 md:h-5 text-white/60" />
           </div>
           
-          <div className="space-y-4">
+          <div className="space-y-3 md:space-y-4">
             {recentActivity.map((activity, index) => (
               <motion.div
                 key={activity.id}
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.4 + index * 0.1 }}
-                className="flex items-center space-x-3 p-3 bg-white/5 rounded-lg hover:bg-white/10 transition-colors"
+                className="flex items-center space-x-2 md:space-x-3 p-2 md:p-3 bg-white/5 rounded-lg hover:bg-white/10 transition-colors"
               >
                 <div className="flex-shrink-0">
                   {getActivityIcon(activity.type)}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-white text-sm font-medium">{activity.user}</p>
+                  <p className="text-white text-xs md:text-sm font-medium truncate">{activity.user}</p>
                   <p className="text-white/60 text-xs truncate">{activity.description}</p>
                 </div>
                 <div className="flex-shrink-0">
@@ -352,7 +352,7 @@ const Dashboard: React.FC<{ onPageChange?: (page: string) => void }> = ({ onPage
             ))}
           </div>
           
-          <button className="w-full mt-4 py-2 text-blue-400 hover:text-blue-300 text-sm font-medium transition-colors">
+          <button className="w-full mt-3 md:mt-4 py-2 text-blue-400 hover:text-blue-300 text-xs md:text-sm font-medium transition-colors">
             View All Activity
           </button>
         </motion.div>
@@ -362,52 +362,52 @@ const Dashboard: React.FC<{ onPageChange?: (page: string) => void }> = ({ onPage
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.4 }}
-          className="bg-white/10 backdrop-blur-xl rounded-xl p-6 border border-white/20"
+          className="bg-white/10 backdrop-blur-xl rounded-xl p-4 md:p-6 border border-white/20"
         >
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-semibold text-white">Quick Actions</h3>
-            <Clock className="w-5 h-5 text-white/60" />
+          <div className="flex items-center justify-between mb-4 md:mb-6">
+            <h3 className="text-base md:text-lg font-semibold text-white">Quick Actions</h3>
+            <Clock className="w-4 h-4 md:w-5 md:h-5 text-white/60" />
           </div>
           
-          <div className="space-y-3">
+          <div className="space-y-2 md:space-y-3">
             <button 
               onClick={() => onPageChange && onPageChange('users')}
-              className="w-full flex items-center space-x-3 p-3 bg-gradient-to-r from-blue-500/20 to-blue-600/20 hover:from-blue-500/30 hover:to-blue-600/30 rounded-lg transition-all duration-200 border border-blue-500/30"
+              className="w-full flex items-center space-x-2 md:space-x-3 p-2 md:p-3 bg-gradient-to-r from-blue-500/20 to-blue-600/20 hover:from-blue-500/30 hover:to-blue-600/30 rounded-lg transition-all duration-200 border border-blue-500/30"
             >
-              <Users className="w-5 h-5 text-blue-400" />
-              <span className="text-white font-medium">Manage Users</span>
+              <Users className="w-4 h-4 md:w-5 md:h-5 text-blue-400 flex-shrink-0" />
+              <span className="text-white font-medium text-xs md:text-sm">Manage Users</span>
             </button>
             
             <button 
               onClick={() => onPageChange && onPageChange('cases')}
-              className="w-full flex items-center space-x-3 p-3 bg-gradient-to-r from-purple-500/20 to-purple-600/20 hover:from-purple-500/30 hover:to-purple-600/30 rounded-lg transition-all duration-200 border border-purple-500/30"
+              className="w-full flex items-center space-x-2 md:space-x-3 p-2 md:p-3 bg-gradient-to-r from-purple-500/20 to-purple-600/20 hover:from-purple-500/30 hover:to-purple-600/30 rounded-lg transition-all duration-200 border border-purple-500/30"
             >
-              <BookOpen className="w-5 h-5 text-purple-400" />
-              <span className="text-white font-medium">Add New Case</span>
+              <BookOpen className="w-4 h-4 md:w-5 md:h-5 text-purple-400 flex-shrink-0" />
+              <span className="text-white font-medium text-xs md:text-sm">Add New Case</span>
             </button>
             
             <button 
               onClick={() => onPageChange && onPageChange('achievements')}
-              className="w-full flex items-center space-x-3 p-3 bg-gradient-to-r from-green-500/20 to-green-600/20 hover:from-green-500/30 hover:to-green-600/30 rounded-lg transition-all duration-200 border border-green-500/30"
+              className="w-full flex items-center space-x-2 md:space-x-3 p-2 md:p-3 bg-gradient-to-r from-green-500/20 to-green-600/20 hover:from-green-500/30 hover:to-green-600/30 rounded-lg transition-all duration-200 border border-green-500/30"
             >
-              <Award className="w-5 h-5 text-green-400" />
-              <span className="text-white font-medium">Create Achievement</span>
+              <Award className="w-4 h-4 md:w-5 md:h-5 text-green-400 flex-shrink-0" />
+              <span className="text-white font-medium text-xs md:text-sm">Create Achievement</span>
             </button>
             
             <button 
               onClick={() => onPageChange && onPageChange('analytics')}
-              className="w-full flex items-center space-x-3 p-3 bg-gradient-to-r from-orange-500/20 to-orange-600/20 hover:from-orange-500/30 hover:to-orange-600/30 rounded-lg transition-all duration-200 border border-orange-500/30"
+              className="w-full flex items-center space-x-2 md:space-x-3 p-2 md:p-3 bg-gradient-to-r from-orange-500/20 to-orange-600/20 hover:from-orange-500/30 hover:to-orange-600/30 rounded-lg transition-all duration-200 border border-orange-500/30"
             >
-              <TrendingUp className="w-5 h-5 text-orange-400" />
-              <span className="text-white font-medium">View Detailed Analytics</span>
+              <TrendingUp className="w-4 h-4 md:w-5 md:h-5 text-orange-400 flex-shrink-0" />
+              <span className="text-white font-medium text-xs md:text-sm">View Analytics</span>
             </button>
             
             <button 
               onClick={() => onPageChange && onPageChange('system')}
-              className="w-full flex items-center space-x-3 p-3 bg-gradient-to-r from-red-500/20 to-red-600/20 hover:from-red-500/30 hover:to-red-600/30 rounded-lg transition-all duration-200 border border-red-500/30"
+              className="w-full flex items-center space-x-2 md:space-x-3 p-2 md:p-3 bg-gradient-to-r from-red-500/20 to-red-600/20 hover:from-red-500/30 hover:to-red-600/30 rounded-lg transition-all duration-200 border border-red-500/30"
             >
-              <Calendar className="w-5 h-5 text-red-400" />
-              <span className="text-white font-medium">Schedule Maintenance</span>
+              <Calendar className="w-4 h-4 md:w-5 md:h-5 text-red-400 flex-shrink-0" />
+              <span className="text-white font-medium text-xs md:text-sm">Maintenance</span>
             </button>
           </div>
         </motion.div>

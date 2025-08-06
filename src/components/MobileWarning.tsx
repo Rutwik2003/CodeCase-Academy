@@ -20,6 +20,19 @@ const MobileWarning: React.FC = () => {
     }
   }, [deviceInfo.isMobile, dismissed]);
 
+  // Prevent body scroll when modal is open
+  useEffect(() => {
+    if (showWarning) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [showWarning]);
+
   const handleDismiss = () => {
     setShowWarning(false);
     setDismissed(true);

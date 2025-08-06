@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, BookOpen, Code, Palette, Layout, Zap, ChevronRight } from 'lucide-react';
+import { Header } from './Header';
 import { HTMLBasicsContent } from './LearnPageDocs/HTMLBasicsContent';
 import { HTMLAdvancedContent } from './LearnPageDocs/HTMLAdvancedContent';
 import { CSSBasicsContent } from './LearnPageDocs/CSSBasicsContent';
@@ -14,6 +16,7 @@ interface LearnPageProps {
 }
 
 export const LearnPage: React.FC<LearnPageProps> = ({ onBack }) => {
+  const navigate = useNavigate();
   const [activeSection, setActiveSection] = useState('html-basics');
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
 
@@ -96,6 +99,14 @@ export const LearnPage: React.FC<LearnPageProps> = ({ onBack }) => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
+      {/* Global Header with Audio Controls */}
+      <Header 
+        onHomeClick={() => navigate('/')}
+        onLearnClick={() => {}}
+        onAuthClick={() => navigate('/signin')}
+        onProfileClick={() => navigate('/profile')}
+      />
+      
       {/* Detective atmosphere overlay */}
       <div className="absolute inset-0 bg-gradient-to-br from-amber-500/5 via-transparent to-blue-500/5 pointer-events-none"></div>
       

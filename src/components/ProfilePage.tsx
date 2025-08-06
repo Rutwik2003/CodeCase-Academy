@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ArrowLeft, User, Mail, Calendar, Trophy, Edit3, Save, X, Star, Settings, Camera, Shield, Target, Eye, EyeOff, FileText, Code, CheckCircle, Clock, Zap, BookOpen, Lock, Users, Copy, Gift, Share2, HelpCircle, LogOut } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useInteractiveTour } from '../contexts/InteractiveTourContext';
+import { AudioWaveform } from './AudioWaveform';
 import { updatePassword, updateEmail, EmailAuthProvider, reauthenticateWithCredential } from 'firebase/auth';
 import toast, { Toaster } from 'react-hot-toast';
 import { DailyLoginModal } from './DailyLoginModal';
@@ -835,9 +836,10 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ onBack }) => {
   };
 
   return (
-    <section className="min-h-screen relative overflow-hidden">
-      {/* Detective Command Center Background - matching Hero component */}
-      <div className="absolute inset-0">
+    <>
+      <section className="min-h-screen relative overflow-hidden">
+        {/* Detective Command Center Background - matching Hero component */}
+        <div className="absolute inset-0">
         {/* Main gradient background */}
         <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950"></div>
         
@@ -884,6 +886,9 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ onBack }) => {
               
               {/* Mobile Action Buttons - 2x2 Grid */}
               <div className="flex sm:hidden flex-wrap gap-1 ml-2">
+                <div className="p-2 bg-slate-800/50 hover:bg-slate-700/50 border border-slate-700/30 rounded-lg backdrop-blur-sm shadow-lg hover:shadow-amber-400/10 transition-all duration-300">
+                  <AudioWaveform />
+                </div>
                 <button
                   onClick={() => setShowProfilePictureModal(true)}
                   className="p-2 bg-slate-800/50 hover:bg-slate-700/50 text-amber-400 rounded-lg transition-all duration-300 border border-slate-700/30 backdrop-blur-sm shadow-lg hover:shadow-amber-400/10"
@@ -923,6 +928,9 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ onBack }) => {
 
               {/* Desktop Action Buttons - Horizontal */}
               <div className="hidden sm:flex items-center space-x-2 lg:space-x-3">
+                <div className="p-2 lg:p-3 bg-slate-800/50 hover:bg-slate-700/50 border border-slate-700/30 rounded-xl backdrop-blur-sm shadow-lg hover:shadow-amber-400/10 transition-all duration-300">
+                  <AudioWaveform />
+                </div>
                 <button
                   onClick={() => setShowProfilePictureModal(true)}
                   className="p-2 lg:p-3 bg-slate-800/50 hover:bg-slate-700/50 text-amber-400 rounded-xl transition-all duration-300 border border-slate-700/30 backdrop-blur-sm shadow-lg hover:shadow-amber-400/10"
@@ -2135,5 +2143,6 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ onBack }) => {
         onClose={() => setIsReferralModalOpen(false)} 
       />
     </section>
+    </>
   );
 };

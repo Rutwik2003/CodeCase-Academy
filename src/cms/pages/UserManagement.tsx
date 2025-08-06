@@ -20,8 +20,9 @@ import {
 } from 'lucide-react';
 import { collection, getDocs, doc, updateDoc, deleteDoc, Timestamp, addDoc } from 'firebase/firestore';
 import { db } from '../../config/firebase';
-import toast from 'react-hot-toast';
+import { professionalToast } from '../utils/professionalToast';
 import { logger, LogCategory } from '../../utils/logger';
+import MobileUserCard from '../components/MobileUserCard';
 
 interface User {
   uid: string;
@@ -123,15 +124,7 @@ const UserManagement: React.FC = () => {
       logger.error('❌ Error message:', (error as any)?.message, LogCategory.CMS);
       
       // Show error notification
-      toast.error('Failed to load users from database', {
-        style: {
-          background: '#1e293b',
-          color: '#f1f5f9',
-          border: '1px solid #ef4444'
-        },
-        icon: '❌',
-        duration: 4000
-      });
+      professionalToast.error('Loading Failed', 'Failed to load users from database');
     } finally {
       if (!silent) {
         setLoading(false);
@@ -186,15 +179,7 @@ const UserManagement: React.FC = () => {
       setEditingUser(null);
       
       // Show success notification
-      toast.success('User updated successfully!', {
-        style: {
-          background: '#1e293b',
-          color: '#f1f5f9',
-          border: '1px solid #10b981'
-        },
-        icon: '✅',
-        duration: 3000
-      });
+      professionalToast.success('User Updated', 'User information updated successfully!');
       
     } catch (error) {
       logger.error('❌ Error updating user:', error, LogCategory.CMS);
@@ -204,15 +189,7 @@ const UserManagement: React.FC = () => {
       // Refresh to show current state in case of error
       await loadUsers(true);
       
-      toast.error('Failed to update user', {
-        style: {
-          background: '#1e293b',
-          color: '#f1f5f9',
-          border: '1px solid #ef4444'
-        },
-        icon: '❌',
-        duration: 4000
-      });
+      professionalToast.error('Update Failed', 'Failed to update user information');
     }
   };
 
@@ -255,29 +232,10 @@ const UserManagement: React.FC = () => {
       }
       
       // Step 5: Show success message with full details
-      toast.success(`User "${userToDelete.displayName}" completely deleted!`, {
-        style: {
-          background: '#1e293b',
-          color: '#f1f5f9',
-          border: '1px solid #10b981'
-        },
-        icon: '🗑️',
-        duration: 4000
-      });
+      professionalToast.success('User Deleted', `"${userToDelete.displayName}" has been completely removed from the database`);
       
-      // Step 6: Show additional info about Auth limitation
-      toast(`✅ Database: User data completely removed
-⚠️ Firebase Auth: User login remains (security limitation)
-💡 User cannot access app but auth record exists`, {
-        style: {
-          background: '#1e293b',
-          color: '#cbd5e1',
-          border: '1px solid #f59e0b',
-          whiteSpace: 'pre-line'
-        },
-        icon: 'ℹ️',
-        duration: 8000
-      });
+      // Step 6: Show additional info about Auth limitation  
+      professionalToast.info('Security Note', 'User data removed. Firebase Auth record remains for security.');
       
       // Step 7: Close confirmation dialog
       setShowDeleteConfirm(false);
@@ -294,15 +252,7 @@ const UserManagement: React.FC = () => {
       
       // Show detailed error message
       const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-      toast.error(`Failed to delete user: ${errorMessage}. Check console for details.`, {
-        style: {
-          background: '#1e293b',
-          color: '#f1f5f9',
-          border: '1px solid #ef4444'
-        },
-        icon: '❌',
-        duration: 8000
-      });
+      professionalToast.error('Deletion Failed', `Unable to delete user: ${errorMessage}`);
     }
   };
 
@@ -341,37 +291,13 @@ const UserManagement: React.FC = () => {
       await loadUsers(true);
       setShowAddUserModal(false);
       
-      toast.success(`User '${userData.displayName}' added successfully!`, {
-        style: {
-          background: '#1e293b',
-          color: '#f1f5f9',
-          border: '1px solid #10b981'
-        },
-        icon: '👤',
-        duration: 4000
-      });
+      professionalToast.success('User Added', `'${userData.displayName}' has been successfully added`);
       
       // Show additional details in a separate toast
-      toast(`Default settings applied:\n• Level: 1\n• Hints: 2\n• Points: 500`, {
-        style: {
-          background: '#1e293b',
-          color: '#cbd5e1',
-          border: '1px solid #475569'
-        },
-        icon: 'ℹ️',
-        duration: 5000
-      });
+      professionalToast.info('Default Settings', 'Level: 1, Hints: 2, Points: 500');
     } catch (error) {
       logger.error('Error adding user:', error, LogCategory.CMS);
-      toast.error('Failed to add user', {
-        style: {
-          background: '#1e293b',
-          color: '#f1f5f9',
-          border: '1px solid #ef4444'
-        },
-        icon: '❌',
-        duration: 4000
-      });
+      professionalToast.error('Addition Failed', 'Unable to add new user');
     }
   };
 
@@ -436,76 +362,76 @@ const UserManagement: React.FC = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6">
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-white/10 backdrop-blur-xl rounded-xl p-6 border border-white/20"
+        className="bg-white/10 backdrop-blur-xl rounded-xl p-4 md:p-6 border border-white/20"
       >
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
           <div>
-            <div className="flex items-center space-x-3 mb-2">
-              <h2 className="text-2xl font-bold text-white">User Management</h2>
+            <div className="flex items-center space-x-2 md:space-x-3 mb-2">
+              <h2 className="text-xl md:text-2xl font-bold text-white">User Management</h2>
               {refreshing && (
-                <div className="flex items-center space-x-2 px-3 py-1 bg-blue-500/10 rounded-full border border-blue-500/20">
+                <div className="flex items-center space-x-1 md:space-x-2 px-2 md:px-3 py-1 bg-blue-500/10 rounded-full border border-blue-500/20">
                   <RefreshCw className="w-3 h-3 text-blue-400 animate-spin" />
-                  <span className="text-blue-400 text-xs font-medium">Auto-refreshing...</span>
+                  <span className="text-blue-400 text-xs font-medium hidden md:block">Auto-refreshing...</span>
                 </div>
               )}
             </div>
-            <p className="text-white/60">
-              Manage {users.length} registered users across CodeCase Detective Academy • Auto-refresh every 30s
+            <p className="text-white/60 text-sm md:text-base">
+              Manage {users.length} registered users • Auto-refresh every 30s
             </p>
           </div>
           
-          <div className="flex items-center space-x-4">
+          <div className="flex flex-wrap items-center gap-2 md:gap-4">
             <button
               onClick={() => loadUsers()}
               disabled={refreshing}
-              className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all border ${
+              className={`flex items-center space-x-1 md:space-x-2 px-3 md:px-4 py-2 rounded-lg transition-all border text-xs md:text-sm ${
                 refreshing 
                   ? 'bg-blue-500/10 text-blue-400/50 border-blue-500/20 cursor-not-allowed' 
                   : 'bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 border-blue-500/30 hover:border-blue-500/50'
               }`}
             >
-              <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
-              <span>{refreshing ? 'Refreshing...' : 'Refresh'}</span>
+              <RefreshCw className={`w-3 h-3 md:w-4 md:h-4 ${refreshing ? 'animate-spin' : ''}`} />
+              <span className="hidden md:block">{refreshing ? 'Refreshing...' : 'Refresh'}</span>
             </button>
             
             <button
               onClick={exportUsers}
-              className="flex items-center space-x-2 px-4 py-2 bg-green-500/20 hover:bg-green-500/30 text-green-400 rounded-lg transition-colors border border-green-500/30"
+              className="flex items-center space-x-1 md:space-x-2 px-3 md:px-4 py-2 bg-green-500/20 hover:bg-green-500/30 text-green-400 rounded-lg transition-colors border border-green-500/30 text-xs md:text-sm"
             >
-              <Download className="w-4 h-4" />
-              <span>Export CSV</span>
+              <Download className="w-3 h-3 md:w-4 md:h-4" />
+              <span className="hidden md:block">Export CSV</span>
             </button>
             
             <button 
               onClick={() => setShowAddUserModal(true)}
-              className="flex items-center space-x-2 px-4 py-2 bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 rounded-lg transition-colors border border-blue-500/30"
+              className="flex items-center space-x-1 md:space-x-2 px-3 md:px-4 py-2 bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 rounded-lg transition-colors border border-blue-500/30 text-xs md:text-sm"
             >
-              <Plus className="w-4 h-4" />
-              <span>Add User</span>
+              <Plus className="w-3 h-3 md:w-4 md:h-4" />
+              <span className="hidden sm:block">Add User</span>
             </button>
           </div>
         </div>
       </motion.div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="bg-white/10 backdrop-blur-xl rounded-xl p-4 border border-white/20"
+          className="bg-white/10 backdrop-blur-xl rounded-xl p-3 md:p-4 border border-white/20"
         >
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-white/60 text-sm">Total Users</p>
-              <p className="text-2xl font-bold text-white">{users.length}</p>
+              <p className="text-white/60 text-xs md:text-sm">Total Users</p>
+              <p className="text-lg md:text-2xl font-bold text-white">{users.length}</p>
             </div>
-            <Users className="w-8 h-8 text-blue-400" />
+            <Users className="w-6 h-6 md:w-8 md:h-8 text-blue-400" />
           </div>
         </motion.div>
 
@@ -513,16 +439,16 @@ const UserManagement: React.FC = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="bg-white/10 backdrop-blur-xl rounded-xl p-4 border border-white/20"
+          className="bg-white/10 backdrop-blur-xl rounded-xl p-3 md:p-4 border border-white/20"
         >
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-white/60 text-sm">Active Users</p>
-              <p className="text-2xl font-bold text-white">
+              <p className="text-white/60 text-xs md:text-sm">Active Users</p>
+              <p className="text-lg md:text-2xl font-bold text-white">
                 {users.filter(u => u.isActive).length}
               </p>
             </div>
-            <UserCheck className="w-8 h-8 text-green-400" />
+            <UserCheck className="w-6 h-6 md:w-8 md:h-8 text-green-400" />
           </div>
         </motion.div>
 
@@ -530,16 +456,16 @@ const UserManagement: React.FC = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
-          className="bg-white/10 backdrop-blur-xl rounded-xl p-4 border border-white/20"
+          className="bg-white/10 backdrop-blur-xl rounded-xl p-3 md:p-4 border border-white/20"
         >
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-white/60 text-sm">Avg. Completion</p>
-              <p className="text-2xl font-bold text-white">
+              <p className="text-white/60 text-xs md:text-sm">Avg. Complete</p>
+              <p className="text-lg md:text-2xl font-bold text-white">
                 {users.length > 0 ? Math.round(users.reduce((acc, u) => acc + u.completedCases.length, 0) / users.length) : 0}
               </p>
             </div>
-            <TrendingUp className="w-8 h-8 text-purple-400" />
+            <TrendingUp className="w-6 h-6 md:w-8 md:h-8 text-purple-400" />
           </div>
         </motion.div>
 
@@ -547,16 +473,16 @@ const UserManagement: React.FC = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
-          className="bg-white/10 backdrop-blur-xl rounded-xl p-4 border border-white/20"
+          className="bg-white/10 backdrop-blur-xl rounded-xl p-3 md:p-4 border border-white/20"
         >
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-white/60 text-sm">Top Score</p>
-              <p className="text-2xl font-bold text-white">
+              <p className="text-white/60 text-xs md:text-sm">Top Score</p>
+              <p className="text-lg md:text-2xl font-bold text-white">
                 {users.length > 0 ? Math.max(...users.map(u => u.totalPoints)) : 0}
               </p>
             </div>
-            <Award className="w-8 h-8 text-yellow-400" />
+            <Award className="w-6 h-6 md:w-8 md:h-8 text-yellow-400" />
           </div>
         </motion.div>
       </div>
@@ -566,26 +492,26 @@ const UserManagement: React.FC = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.5 }}
-        className="bg-white/10 backdrop-blur-xl rounded-xl p-6 border border-white/20"
+        className="bg-white/10 backdrop-blur-xl rounded-xl p-4 md:p-6 border border-white/20"
       >
-        <div className="flex flex-col lg:flex-row lg:items-center space-y-4 lg:space-y-0 lg:space-x-4">
+        <div className="flex flex-col lg:flex-row lg:items-center space-y-3 lg:space-y-0 lg:space-x-4">
           <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-white/40" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 md:w-5 md:h-5 text-white/40" />
             <input
               type="text"
-              placeholder="Search users by email or name..."
+              placeholder="Search users..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/40 focus:outline-none focus:border-blue-400"
+              className="w-full pl-9 md:pl-10 pr-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/40 focus:outline-none focus:border-blue-400 text-sm md:text-base"
             />
           </div>
           
           <div className="flex items-center space-x-2">
-            <Filter className="w-5 h-5 text-white/60" />
+            <Filter className="w-4 h-4 md:w-5 md:h-5 text-white/60" />
             <select
               value={filterStatus}
               onChange={(e) => setFilterStatus(e.target.value as 'all' | 'active' | 'inactive')}
-              className="px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:border-blue-400"
+              className="px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:border-blue-400 text-sm md:text-base"
             >
               <option value="all" className="bg-slate-800 text-white">All Users</option>
               <option value="active" className="bg-slate-800 text-white">Active Only</option>
@@ -595,14 +521,15 @@ const UserManagement: React.FC = () => {
         </div>
       </motion.div>
 
-      {/* Users Table */}
+      {/* Users Display - Desktop Table / Mobile Cards */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.6 }}
         className="bg-white/10 backdrop-blur-xl rounded-xl border border-white/20 overflow-hidden"
       >
-        <div className="overflow-x-auto">
+        {/* Desktop Table View */}
+        <div className="hidden lg:block overflow-x-auto custom-scrollbar">
           <table className="w-full">
             <thead className="bg-white/5">
               <tr>
@@ -713,6 +640,33 @@ const UserManagement: React.FC = () => {
             </tbody>
           </table>
         </div>
+
+        {/* Mobile Cards View */}
+        <div className="lg:hidden p-4 space-y-4">
+          {filteredUsers.map((user) => (
+            <MobileUserCard
+              key={user.uid}
+              user={user}
+              onView={() => {
+                setSelectedUser(user);
+                setShowUserModal(true);
+              }}
+              onEdit={() => setEditingUser(user)}
+              onDelete={() => {
+                setUserToDelete(user);
+                setShowDeleteConfirm(true);
+              }}
+              onToggleStatus={() => handleToggleUserStatus(user)}
+            />
+          ))}
+          
+          {filteredUsers.length === 0 && (
+            <div className="text-center py-12">
+              <Users className="w-12 h-12 text-white/40 mx-auto mb-4" />
+              <p className="text-white/60">No users found matching your criteria.</p>
+            </div>
+          )}
+        </div>
       </motion.div>
 
       {/* User Details Modal */}
@@ -721,7 +675,7 @@ const UserManagement: React.FC = () => {
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="bg-slate-800 rounded-xl p-6 max-w-2xl w-full max-h-[80vh] overflow-y-auto"
+            className="bg-slate-800 rounded-xl p-6 max-w-2xl w-full max-h-[80vh] overflow-y-auto custom-scrollbar"
           >
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-xl font-bold text-white">User Details</h3>

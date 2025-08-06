@@ -24,7 +24,7 @@ import {
 import { db } from '../../config/firebase';
 import { collection, getDocs, doc, setDoc } from 'firebase/firestore';
 import { cases as importedCases } from '../../data/cases';
-import toast from 'react-hot-toast';
+import { professionalToast } from '../utils/professionalToast';
 import { showConfirm } from '../../components/CustomAlert';
 import { logger, LogCategory } from '../../utils/logger';
 
@@ -101,7 +101,7 @@ const CaseManagement: React.FC = () => {
         }).sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0)); // Sort by display order
         logger.info('✅ Loaded cases from Firebase after initialization:', firebaseCases.length, firebaseCases.map(c => c.title), LogCategory.CMS);
         setCases(firebaseCases);
-        toast.success(`✅ Successfully initialized ${firebaseCases.length} cases in Firebase`);
+        professionalToast.success('Cases Initialized', `Successfully loaded ${firebaseCases.length} cases from Firebase`);
       } else {
         logger.info(`📚 Loaded ${casesSnapshot.size} cases from Firebase`, LogCategory.CMS);
         const firebaseCases = casesSnapshot.docs.map(doc => {
@@ -118,7 +118,7 @@ const CaseManagement: React.FC = () => {
       }
     } catch (error) {
       logger.error('❌ Error loading cases:', error, LogCategory.CMS);
-      toast.error('Failed to load cases from Firebase');
+      professionalToast.error('Loading Failed', 'Failed to load cases from Firebase');
       
       // Fallback to imported cases
       logger.info('🔄 Falling back to imported cases data...', LogCategory.CMS);
@@ -275,10 +275,10 @@ const CaseManagement: React.FC = () => {
       // Reload cases
       await loadCases();
       
-      toast.success('✅ Cases refreshed successfully with missions!', { id: 'refresh-cases' });
+      professionalToast.success('Refresh Complete', 'Cases refreshed successfully with missions!');
     } catch (error) {
       logger.error('❌ Error refreshing cases:', error, LogCategory.CMS);
-      toast.error('Failed to refresh cases', { id: 'refresh-cases' });
+      professionalToast.error('Refresh Failed', 'Failed to refresh cases');
     }
   };
 
@@ -614,7 +614,7 @@ const CaseManagement: React.FC = () => {
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="bg-slate-800 rounded-xl p-6 max-w-4xl w-full max-h-[90vh] overflow-y-auto"
+            className="bg-slate-800 rounded-xl p-6 max-w-4xl w-full max-h-[90vh] overflow-y-auto custom-scrollbar"
           >
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-xl font-bold text-white">
@@ -644,7 +644,7 @@ const CaseManagement: React.FC = () => {
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="bg-slate-800 rounded-xl p-6 max-w-4xl w-full max-h-[90vh] overflow-y-auto"
+            className="bg-slate-800 rounded-xl p-6 max-w-4xl w-full max-h-[90vh] overflow-y-auto custom-scrollbar"
           >
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-xl font-bold text-white">Case Preview</h3>
@@ -667,7 +667,7 @@ const CaseManagement: React.FC = () => {
                     <h5 className="text-white font-medium mb-2 flex items-center">
                       📖 Story Content
                     </h5>
-                    <div className="bg-white/5 rounded-lg p-4 max-h-40 overflow-y-auto">
+                    <div className="bg-white/5 rounded-lg p-4 max-h-40 overflow-y-auto custom-scrollbar">
                       <pre className="text-white/80 text-sm whitespace-pre-wrap font-sans">
                         {previewCase.story}
                       </pre>
@@ -711,28 +711,28 @@ const CaseManagement: React.FC = () => {
               <div className="grid grid-cols-2 gap-6">
                 <div className="space-y-4">
                   <h5 className="text-white font-medium">Initial HTML</h5>
-                  <pre className="bg-black/30 rounded-lg p-4 text-green-400 text-sm overflow-x-auto">
+                  <pre className="bg-black/30 rounded-lg p-4 text-green-400 text-sm overflow-x-auto custom-scrollbar">
                     <code>{previewCase.initialHtml}</code>
                   </pre>
                 </div>
                 
                 <div className="space-y-4">
                   <h5 className="text-white font-medium">Target HTML</h5>
-                  <pre className="bg-black/30 rounded-lg p-4 text-blue-400 text-sm overflow-x-auto">
+                  <pre className="bg-black/30 rounded-lg p-4 text-blue-400 text-sm overflow-x-auto custom-scrollbar">
                     <code>{previewCase.targetHtml}</code>
                   </pre>
                 </div>
                 
                 <div className="space-y-4">
                   <h5 className="text-white font-medium">Initial CSS</h5>
-                  <pre className="bg-black/30 rounded-lg p-4 text-green-400 text-sm overflow-x-auto">
+                  <pre className="bg-black/30 rounded-lg p-4 text-green-400 text-sm overflow-x-auto custom-scrollbar">
                     <code>{previewCase.initialCss}</code>
                   </pre>
                 </div>
                 
                 <div className="space-y-4">
                   <h5 className="text-white font-medium">Target CSS</h5>
-                  <pre className="bg-black/30 rounded-lg p-4 text-blue-400 text-sm overflow-x-auto">
+                  <pre className="bg-black/30 rounded-lg p-4 text-blue-400 text-sm overflow-x-auto custom-scrollbar">
                     <code>{previewCase.targetCss}</code>
                   </pre>
                 </div>

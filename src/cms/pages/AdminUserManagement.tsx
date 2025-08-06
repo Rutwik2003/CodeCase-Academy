@@ -34,7 +34,7 @@ interface RegularUser {
 
 const AdminUserManagement: React.FC = () => {
   const { currentUser } = useAuth();
-  const { notifications, addNotification, removeNotification } = useCMSNotifications();
+  const { notifications, addNotification, removeNotification, replaceNotification } = useCMSNotifications();
   const [admins, setAdmins] = useState<AdminUser[]>([]);
   const [regularUsers, setRegularUsers] = useState<RegularUser[]>([]);
   const [loading, setLoading] = useState(true);
@@ -44,6 +44,7 @@ const AdminUserManagement: React.FC = () => {
   const [selectedUserMode, setSelectedUserMode] = useState<'dropdown' | 'manual'>('dropdown');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedUser, setSelectedUser] = useState<RegularUser | null>(null);
+  const [deletingAdmin, setDeletingAdmin] = useState<string | null>(null); // Prevent double deletion
   const [formData, setFormData] = useState<AdminFormData>({
     email: '',
     role: AdminRole.ANALYTICS_VIEWER,
@@ -127,7 +128,7 @@ const AdminUserManagement: React.FC = () => {
       setRegularUsers(usersList);
     } catch (error) {
       logger.error('Error loading users:', error, LogCategory.CMS);
-      addNotification('error', 'Error Loading Users', 'Failed to load regular users from database.');
+      addNotification('error', 'Loading Error', 'Failed to load users from database.');
     } finally {
       setLoadingUsers(false);
     }
@@ -152,10 +153,10 @@ const AdminUserManagement: React.FC = () => {
       });
 
       setAdmins(adminsList);
-      addNotification('success', 'Admins Loaded', `Successfully loaded ${adminsList.length} admin users.`);
+      // Removed automatic "Admins Loaded" notification to prevent multiple stacked notifications
     } catch (error) {
       logger.error('Error loading admins:', error, LogCategory.CMS);
-      addNotification('error', 'Error Loading Admins', 'Failed to load admin users from database.');
+      addNotification('error', 'Loading Error', 'Failed to load admin users from database.');
     } finally {
       setLoading(false);
     }
@@ -191,7 +192,7 @@ const AdminUserManagement: React.FC = () => {
         : formData.email;
 
       if (!emailToUse) {
-        addNotification('warning', 'Email Required', 'Please select a user or enter an email address.');
+        replaceNotification('warning', 'Input Required', 'Please select a user or enter an email address.');
         return;
       }
 
@@ -203,7 +204,7 @@ const AdminUserManagement: React.FC = () => {
           isActive: formData.isActive,
           updatedAt: Timestamp.now()
         });
-        addNotification('success', 'Admin Updated', `Successfully updated admin permissions for ${emailToUse}.`);
+        replaceNotification('success', 'Admin Updated', `Successfully updated ${emailToUse}'s admin permissions.`);
       } else {
         // Create new admin
         const adminId = `admin_${Date.now()}`;
@@ -216,7 +217,7 @@ const AdminUserManagement: React.FC = () => {
           lastLogin: null,
           createdBy: currentUser?.uid
         });
-        addNotification('success', 'Admin Created', `Successfully created admin account for ${emailToUse}.`);
+        replaceNotification('success', 'Admin Created', `Successfully granted admin access to ${emailToUse}.`);
       }
 
       // Reset form and reload
@@ -233,7 +234,7 @@ const AdminUserManagement: React.FC = () => {
 
     } catch (error) {
       logger.error('Error saving admin:', error, LogCategory.CMS);
-      addNotification('error', 'Save Failed', 'Failed to save admin user. Please try again.');
+      replaceNotification('error', 'Operation Failed', 'Unable to save admin changes. Please try again.');
     }
   };
 
@@ -249,23 +250,33 @@ const AdminUserManagement: React.FC = () => {
   };
 
   const handleDelete = async (adminId: string) => {
+    // Prevent double deletion attempts
+    if (deletingAdmin === adminId) return;
+    
     const admin = admins.find(a => a.uid === adminId);
     if (!admin) return;
 
-    // Show confirmation via CMS notification
-    addNotification('warning', 'Confirm Deletion', `Are you sure you want to remove admin access for ${admin.email}?`, {
+    setDeletingAdmin(adminId);
+
+    // Show professional confirmation via CMS notification
+    const notificationId = replaceNotification('warning', 'Confirm Admin Removal', `Remove admin access for ${admin.email}?`, {
       duration: 0, // Don't auto-dismiss
       actions: [
         {
-          label: 'Delete',
+          label: 'Remove Access',
           onClick: async () => {
             try {
+              // Clear the confirmation notification first
+              if (notificationId) removeNotification(notificationId);
+              
               await deleteDoc(doc(db, 'admins', adminId));
               loadAdmins();
-              addNotification('success', 'Admin Removed', `Successfully removed admin access for ${admin.email}.`);
+              setDeletingAdmin(null); // Reset deletion flag
+              replaceNotification('success', 'Access Removed', `${admin.email} no longer has admin access.`);
             } catch (error) {
               logger.error('Error deleting admin:', error, LogCategory.CMS);
-              addNotification('error', 'Delete Failed', 'Failed to remove admin user. Please try again.');
+              setDeletingAdmin(null); // Reset deletion flag on error
+              replaceNotification('error', 'Removal Failed', 'Unable to remove admin access. Please try again.');
             }
           },
           variant: 'primary'
@@ -273,7 +284,9 @@ const AdminUserManagement: React.FC = () => {
         {
           label: 'Cancel',
           onClick: () => {
-            // Notification will auto-close
+            // Properly dismiss the confirmation notification and reset flag
+            if (notificationId) removeNotification(notificationId);
+            setDeletingAdmin(null);
           },
           variant: 'secondary'
         }
@@ -406,8 +419,13 @@ const AdminUserManagement: React.FC = () => {
                     
                     <button
                       onClick={() => handleDelete(admin.uid)}
-                      className="p-2 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-lg transition-colors"
-                      title="Remove Admin"
+                      disabled={deletingAdmin === admin.uid}
+                      className={`p-2 rounded-lg transition-colors ${
+                        deletingAdmin === admin.uid
+                          ? 'bg-gray-500/20 text-gray-500 cursor-not-allowed'
+                          : 'bg-red-500/20 hover:bg-red-500/30 text-red-400'
+                      }`}
+                      title={deletingAdmin === admin.uid ? 'Deletion in progress...' : 'Remove Admin'}
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
@@ -444,7 +462,7 @@ const AdminUserManagement: React.FC = () => {
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-slate-800 rounded-xl border border-slate-700 p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto"
+              className="bg-slate-800 rounded-xl border border-slate-700 p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto custom-scrollbar"
             >
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-bold text-white">
@@ -505,7 +523,7 @@ const AdminUserManagement: React.FC = () => {
                         </div>
 
                         {/* User Dropdown */}
-                        <div className="max-h-60 overflow-y-auto bg-slate-700 border border-slate-600 rounded-lg">
+                        <div className="max-h-60 overflow-y-auto bg-slate-700 border border-slate-600 rounded-lg custom-scrollbar">
                           {loadingUsers ? (
                             <div className="p-4 text-center text-white/60">Loading users...</div>
                           ) : filteredUsers.length === 0 ? (

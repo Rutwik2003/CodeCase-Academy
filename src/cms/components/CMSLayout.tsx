@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
   Users, 
@@ -18,12 +19,14 @@ import {
   Bug,
   MessageSquare,
   ArrowLeft,
-  Wrench
+  Wrench,
+  Volume2
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useAdmin } from '../hooks/useAdmin';
 import { AdminPermission } from '../utils/adminAuth';
 import { logger, LogCategory } from '../../utils/logger';
+// import { CMSAudioWidget } from './CMSAudioWidget';
 
 interface CMSLayoutProps {
   children: React.ReactNode;
@@ -32,8 +35,9 @@ interface CMSLayoutProps {
 }
 
 const CMSLayout: React.FC<CMSLayoutProps> = ({ children, currentPage, onPageChange }) => {
-  const { logout } = useAuth();
+  const { logout, userData, currentUser } = useAuth();
   const { adminUser, hasPermission } = useAdmin();
+  const navigate = useNavigate();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   const menuItems = [
@@ -85,6 +89,13 @@ const CMSLayout: React.FC<CMSLayoutProps> = ({ children, currentPage, onPageChan
       icon: FileText,
       permission: AdminPermission.MANAGE_CASES,
       color: 'text-indigo-500'
+    },
+    {
+      id: 'audio',
+      label: 'Audio Management',
+      icon: Volume2,
+      permission: AdminPermission.SYSTEM_SETTINGS,
+      color: 'text-purple-500'
     },
     {
       id: 'activity',
@@ -143,30 +154,33 @@ const CMSLayout: React.FC<CMSLayoutProps> = ({ children, currentPage, onPageChan
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 cms-container">
+      {/* Glassmorphism overlay matching main site */}
+      <div className="absolute inset-0 backdrop-blur-3xl bg-gradient-to-br from-slate-900/40 via-slate-800/20 to-slate-900/40 pointer-events-none"></div>
+      
       {/* Sidebar */}
       <motion.aside
         initial={{ x: -300 }}
         animate={{ x: isSidebarOpen ? 0 : -300 }}
         transition={{ duration: 0.3 }}
-        className="fixed left-0 top-0 h-full w-64 bg-white/10 backdrop-blur-xl border-r border-white/20 z-50 flex flex-col"
+        className="fixed left-0 top-0 h-full w-72 md:w-64 bg-slate-900/40 backdrop-blur-xl border-r border-slate-700/50 z-50 flex flex-col"
       >
         <div className="flex flex-col h-full overflow-hidden">
           {/* Header */}
-          <div className="flex-shrink-0 p-6 border-b border-white/20">
+          <div className="flex-shrink-0 p-4 md:p-6 border-b border-slate-700/50">
             <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center">
-                  <Shield className="w-6 h-6 text-white" />
+              <div className="flex items-center space-x-2 md:space-x-3">
+                <div className="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-amber-500 to-orange-600 rounded-lg flex items-center justify-center">
+                  <Shield className="w-4 h-4 md:w-6 md:h-6 text-white" />
                 </div>
                 <div>
-                  <h2 className="text-white font-bold text-lg">CodeCase</h2>
-                  <p className="text-white/60 text-sm">Admin Dashboard</p>
+                  <h2 className="text-slate-100 font-bold text-base md:text-lg">CodeCase</h2>
+                  <p className="text-slate-400 text-xs md:text-sm">Admin Dashboard</p>
                 </div>
               </div>
               <button
                 onClick={() => setIsSidebarOpen(false)}
-                className="lg:hidden text-white/60 hover:text-white"
+                className="lg:hidden text-slate-400 hover:text-slate-200 p-1"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -174,20 +188,20 @@ const CMSLayout: React.FC<CMSLayoutProps> = ({ children, currentPage, onPageChan
           </div>
 
           {/* Admin Info */}
-          <div className="flex-shrink-0 p-4 border-b border-white/20">
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center">
-                <span className="text-white font-bold text-sm">
-                  {adminUser?.email.charAt(0).toUpperCase()}
+          <div className="flex-shrink-0 p-3 md:p-4 border-b border-slate-700/50">
+            <div className="flex items-center space-x-2 md:space-x-3">
+              <div className="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-amber-500 to-orange-600 rounded-full flex items-center justify-center">
+                <span className="text-white font-bold text-xs md:text-sm">
+                  {(userData?.displayName || currentUser?.displayName || adminUser?.email || 'A').charAt(0).toUpperCase()}
                 </span>
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-white font-medium text-sm truncate">
-                  {adminUser?.email}
+                <p className="text-slate-100 font-medium text-xs md:text-sm truncate">
+                  {userData?.displayName || currentUser?.displayName || adminUser?.email}
                 </p>
                 <div className="flex items-center space-x-2">
                   <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                  <span className="text-white/60 text-xs capitalize">
+                  <span className="text-slate-400 text-xs capitalize">
                     {adminUser?.role.replace('_', ' ')}
                   </span>
                 </div>
@@ -196,7 +210,7 @@ const CMSLayout: React.FC<CMSLayoutProps> = ({ children, currentPage, onPageChan
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
+          <nav className="flex-1 p-2 md:p-4 space-y-1 md:space-y-2 overflow-y-auto custom-scrollbar">
             {visibleMenuItems.map((item) => {
               const Icon = item.icon;
               const isActive = currentPage === item.id;
@@ -207,18 +221,18 @@ const CMSLayout: React.FC<CMSLayoutProps> = ({ children, currentPage, onPageChan
                   onClick={() => onPageChange(item.id)}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 ${
+                  className={`w-full flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2 md:py-3 rounded-lg transition-all duration-200 ${
                     isActive
-                      ? 'bg-white/20 text-white shadow-lg'
-                      : 'text-white/70 hover:text-white hover:bg-white/10'
+                      ? 'bg-slate-800/50 text-slate-100 shadow-lg border border-slate-700/50'
+                      : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/30'
                   }`}
                 >
-                  <Icon className={`w-5 h-5 ${isActive ? 'text-white' : item.color}`} />
-                  <span className="font-medium">{item.label}</span>
+                  <Icon className={`w-4 h-4 md:w-5 md:h-5 ${isActive ? 'text-amber-400' : item.color} flex-shrink-0`} />
+                  <span className="font-medium text-xs md:text-sm truncate">{item.label}</span>
                   {isActive && (
                     <motion.div
                       layoutId="activeIndicator"
-                      className="ml-auto w-2 h-2 bg-white rounded-full"
+                      className="ml-auto w-2 h-2 bg-amber-400 rounded-full flex-shrink-0"
                     />
                   )}
                 </motion.button>
@@ -227,62 +241,67 @@ const CMSLayout: React.FC<CMSLayoutProps> = ({ children, currentPage, onPageChan
           </nav>
 
           {/* Footer - Back to Site and Logout */}
-          <div className="flex-shrink-0 p-4 border-t border-white/20 space-y-2">
+          <div className="flex-shrink-0 p-2 md:p-4 border-t border-slate-700/50 space-y-1 md:space-y-2">
             <button
-              onClick={() => window.location.href = '/'}
-              className="w-full flex items-center space-x-3 px-4 py-3 text-white/70 hover:text-blue-400 hover:bg-blue-500/10 rounded-lg transition-all duration-200"
+              onClick={() => navigate('/')}
+              className="w-full flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2 md:py-3 text-slate-400 hover:text-amber-400 hover:bg-slate-800/30 rounded-lg transition-all duration-200"
             >
-              <ArrowLeft className="w-5 h-5" />
-              <span>Back to Main Site</span>
+              <ArrowLeft className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0" />
+              <span className="text-xs md:text-sm">Back to Main Site</span>
             </button>
             <button
               onClick={handleLogout}
-              className="w-full flex items-center space-x-3 px-4 py-3 text-white/70 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all duration-200"
+              className="w-full flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2 md:py-3 text-slate-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all duration-200"
             >
-              <LogOut className="w-5 h-5" />
-              <span>Logout</span>
+              <LogOut className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0" />
+              <span className="text-xs md:text-sm">Logout</span>
             </button>
           </div>
         </div>
       </motion.aside>
 
       {/* Main Content */}
-      <div className={`transition-all duration-300 ${isSidebarOpen ? 'ml-64' : 'ml-0'}`}>
+      <div className={`transition-all duration-300 ${isSidebarOpen ? 'md:ml-64 lg:ml-72' : 'ml-0'}`}>
         {/* Top Bar */}
-        <header className="bg-white/10 backdrop-blur-xl border-b border-white/20 px-6 py-4">
+        <header className="bg-slate-900/50 backdrop-blur-xl border-b border-slate-700/50 px-4 md:px-6 py-3 md:py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2 md:space-x-4">
               <button
                 onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-                className="text-white/70 hover:text-white"
+                className="text-slate-400 hover:text-slate-200 p-1"
               >
-                <Menu className="w-6 h-6" />
+                <Menu className="w-5 h-5 md:w-6 md:h-6" />
               </button>
               <div>
-                <h1 className="text-2xl font-bold text-white capitalize">
+                <h1 className="text-lg md:text-2xl font-bold text-slate-100 capitalize">
                   {currentPage === 'dashboard' ? 'Admin Dashboard' : currentPage.replace('_', ' ')}
                 </h1>
-                <p className="text-white/60 text-sm">
+                <p className="text-slate-400 text-xs md:text-sm hidden sm:block">
                   CodeCase Detective Academy - Content Management System
                 </p>
               </div>
             </div>
 
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-2 bg-white/10 rounded-lg px-3 py-2">
+            <div className="flex items-center space-x-2 md:space-x-4">
+              <div className="hidden md:flex items-center space-x-2 bg-slate-800/50 rounded-lg px-3 py-2 border border-slate-700/50">
                 <TrendingUp className="w-4 h-4 text-green-400" />
-                <span className="text-white text-sm font-medium">System Online</span>
+                <span className="text-slate-200 text-sm font-medium">System Online</span>
               </div>
-              <div className="flex items-center space-x-2 bg-white/10 rounded-lg px-3 py-2">
-                <Database className="w-4 h-4 text-blue-400" />
-                <span className="text-white text-sm font-medium">Firebase Connected</span>
+              <div className="hidden lg:flex items-center space-x-2 bg-slate-800/50 rounded-lg px-3 py-2 border border-slate-700/50">
+                <Database className="w-4 h-4 text-amber-400" />
+                <span className="text-slate-200 text-sm font-medium">Firebase Connected</span>
+              </div>
+              {/* Mobile status indicators */}
+              <div className="flex md:hidden items-center space-x-1">
+                <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                <div className="w-2 h-2 bg-amber-400 rounded-full"></div>
               </div>
             </div>
           </div>
         </header>
 
         {/* Page Content */}
-        <main className="p-6">
+        <main className="p-3 md:p-6">
           <motion.div
             key={currentPage}
             initial={{ opacity: 0, y: 20 }}
@@ -301,6 +320,9 @@ const CMSLayout: React.FC<CMSLayoutProps> = ({ children, currentPage, onPageChan
           onClick={() => setIsSidebarOpen(false)}
         />
       )}
+      
+      {/* Audio Widget for CMS */}
+      {/* <CMSAudioWidget /> */}
     </div>
   );
 };

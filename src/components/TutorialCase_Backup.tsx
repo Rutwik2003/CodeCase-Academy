@@ -468,6 +468,20 @@ export const TutorialCase: React.FC<TutorialCaseProps> = ({ onComplete, onBack }
   const TutorialOverlay = () => {
     if (!showTutorialOverlay || currentStep.id === 'welcome') return null;
 
+    // Prevent body scroll when overlay is visible
+    React.useEffect(() => {
+      // Save original styles
+      const originalStyle = window.getComputedStyle(document.body).overflow;
+      
+      // Prevent body scroll
+      document.body.style.overflow = 'hidden';
+      
+      // Cleanup function to restore original style
+      return () => {
+        document.body.style.overflow = originalStyle;
+      };
+    }, []);
+
     return (
       <div className="fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center">
         <div className="bg-slate-800 rounded-lg shadow-2xl p-8 max-w-lg mx-4 border border-slate-600">

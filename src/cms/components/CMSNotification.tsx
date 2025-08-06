@@ -173,7 +173,7 @@ export const CMSNotificationManager: React.FC<CMSNotificationManagerProps> = ({
   );
 };
 
-// Hook for managing CMS notifications
+// Hook for managing CMS notifications with professional deduplication
 export const useCMSNotifications = () => {
   const [notifications, setNotifications] = React.useState<Notification[]>([]);
 
@@ -188,19 +188,36 @@ export const useCMSNotifications = () => {
         onClick: () => void;
         variant?: 'primary' | 'secondary';
       }[];
+      preventDuplicate?: boolean;
     }
   ) => {
+    // Check for duplicate notifications (same title and type) if preventDuplicate is enabled
+    const isDuplicate = options?.preventDuplicate !== false && 
+      notifications.some(n => n.title === title && n.type === type);
+    
+    if (isDuplicate) {
+      return null; // Don't add duplicate notification
+    }
+
     const id = `notification_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     const notification: Notification = {
       id,
       type,
       title,
       message,
-      duration: options?.duration,
+      duration: options?.duration ?? (type === 'success' ? 3000 : type === 'error' ? 6000 : 4000),
       actions: options?.actions
     };
 
-    setNotifications(prev => [...prev, notification]);
+    setNotifications(prev => {
+      // Limit to max 3 notifications for professional UI
+      const newNotifications = [...prev, notification];
+      if (newNotifications.length > 3) {
+        return newNotifications.slice(-3);
+      }
+      return newNotifications;
+    });
+    
     return id;
   };
 
@@ -212,10 +229,31 @@ export const useCMSNotifications = () => {
     setNotifications([]);
   };
 
+  const replaceNotification = (
+    type: NotificationType,
+    title: string,
+    message: string,
+    options?: {
+      duration?: number;
+      actions?: {
+        label: string;
+        onClick: () => void;
+        variant?: 'primary' | 'secondary';
+      }[];
+    }
+  ) => {
+    // Remove any existing notification with same title and type
+    setNotifications(prev => prev.filter(n => !(n.title === title && n.type === type)));
+    
+    // Add new notification
+    return addNotification(type, title, message, { ...options, preventDuplicate: false });
+  };
+
   return {
     notifications,
     addNotification,
     removeNotification,
-    clearAll
+    clearAll,
+    replaceNotification
   };
 };

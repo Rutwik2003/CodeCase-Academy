@@ -60,7 +60,7 @@ export const AdminProvider: React.FC<AdminProviderProps> = ({ children }) => {
         setAdminUser(null);
       }
     } catch (error) {
-      logger.error(LogCategory.CMS, 'Error checking admin status:', error);
+      logger.error('Error checking admin status:', error, LogCategory.CMS);
       setIsAdmin(false);
       setAdminUser(null);
     } finally {

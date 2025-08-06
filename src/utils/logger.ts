@@ -291,7 +291,7 @@ class Logger {
     // In a real application, this would send to external monitoring services
     // like Sentry, DataDog, New Relic, etc.
     if (process.env.NODE_ENV === 'development') {
-      logger.error(LogCategory.SYSTEM, '🚨 CRITICAL LOG:', entry);
+      logger.error('🚨 CRITICAL LOG:', entry, LogCategory.UTILITY);
     }
   }
 }

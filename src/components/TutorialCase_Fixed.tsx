@@ -4,6 +4,9 @@ import { Toast } from './Toast';
 import { CaseCompletion } from './CaseCompletion';
 import { showConfirm } from './CustomAlert';
 
+// Import hint guy image
+import hintGuyImg from '/assets/hint_guy.jpeg';
+
 interface TutorialCaseProps {
   onComplete: (points: number) => void;
   onBack: () => void;
@@ -108,7 +111,7 @@ const tutorialSteps: TutorialStepData[] = [
     id: 'get-hint-demo',
     title: 'Need Help? Use Hints!',
     description: 'Stuck? The hint system is here to help you!',
-    instruction: 'Click the "Get Hint" button to see how hints work.',
+    instruction: 'Click the hint guy (detective character) to see how hints work.',
   },
   {
     id: 'code-validation',
@@ -262,6 +265,20 @@ export const TutorialCase: React.FC<TutorialCaseProps> = ({ onComplete, onBack }
   // Tutorial Overlay Component
   const TutorialOverlay = () => {
     if (!showTutorialOverlay || currentStep.id === 'welcome') return null;
+
+    // Prevent body scroll when overlay is visible
+    React.useEffect(() => {
+      // Save original styles
+      const originalStyle = window.getComputedStyle(document.body).overflow;
+      
+      // Prevent body scroll
+      document.body.style.overflow = 'hidden';
+      
+      // Cleanup function to restore original style
+      return () => {
+        document.body.style.overflow = originalStyle;
+      };
+    }, []);
 
     return (
       <div className="fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center">
@@ -541,17 +558,29 @@ export const TutorialCase: React.FC<TutorialCaseProps> = ({ onComplete, onBack }
                   Previous
                 </button>
 
-                <div className="flex items-center gap-2">
-                  {/* Get Hint Button */}
+                <div className="flex items-center gap-4">
+                  {/* Interactive Hint Guy Button */}
                   <button
                     onClick={handleHint}
-                    className="hint-button flex items-center gap-2 px-3 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition-all duration-200 hover:scale-105 text-sm"
+                    className="flex items-center gap-2 px-3 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition-all duration-200 hover:scale-105 text-sm font-medium"
                   >
-                    <Search className="w-4 h-4" />
-                    Hint
-                    <span className="bg-blue-800/50 px-1.5 py-0.5 rounded-full text-xs">
-                      {hintsUsed}
-                    </span>
+                    <div className="relative">
+                      <img 
+                        src={hintGuyImg} 
+                        alt="Tutorial Helper" 
+                        className="w-6 h-6 rounded-full border border-blue-200 object-cover"
+                      />
+                      {/* Hints used counter badge */}
+                      {hintsUsed > 0 && (
+                        <div className="absolute -top-1 -right-1 w-3 h-3 bg-blue-300 rounded-full flex items-center justify-center">
+                          <span className="text-xs text-blue-800 font-bold">{hintsUsed}</span>
+                        </div>
+                      )}
+                    </div>
+                    <div className="text-left">
+                      <div className="text-sm font-medium">Need Help?</div>
+                      <div className="text-xs opacity-90">Click for hint</div>
+                    </div>
                   </button>
 
                   {/* Test Code Button */}

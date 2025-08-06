@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useParams, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { AudioProvider } from '../contexts/AudioContext';
 import { HomePage } from './HomePage';
 import { TutorialCase } from './TutorialCase';
 import { VanishingBloggerCase } from './VanishingBloggerCase';
@@ -218,9 +219,10 @@ export function AppRouter({ availableHints, addToast, onCaseComplete }: AppRoute
 
   return (
     <BrowserRouter>
-      <ScrollToTop />
-      <div className="min-h-screen flex flex-col">
-        <div className="flex-1">
+      <AudioProvider>
+        <ScrollToTop />
+        <div className="min-h-screen flex flex-col">
+          <div className="flex-1">
           <Routes>
             {/* Public Routes */}
             <Route path="/" element={<HomePage />} />
@@ -304,6 +306,10 @@ export function AppRouter({ availableHints, addToast, onCaseComplete }: AppRoute
               path="/admin/*" 
               element={<CMSRouter />} 
             />
+            <Route 
+              path="/cms/*" 
+              element={<CMSRouter />} 
+            />
 
             {/* Catch all route */}
             <Route path="*" element={<NotFoundPage />} />
@@ -316,6 +322,7 @@ export function AppRouter({ availableHints, addToast, onCaseComplete }: AppRoute
       
       {/* Add InteractiveTourTooltip inside Router context */}
       <InteractiveTourTooltip />
+      </AudioProvider>
     </BrowserRouter>
   );
 }

@@ -2,6 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { ChevronRight, ChevronLeft, Star, Search, Monitor, CheckCircle, AlertCircle, Play, BookOpen, Trophy, Lightbulb, X, MousePointer, Eye, Code2 } from 'lucide-react';
 import { Toast } from './Toast';
 import { showConfirm } from './CustomAlert';
+import { AudioWaveform } from './AudioWaveform';
+
+// Import hint guy image
+import hintGuyImg from '/assets/hint_guy.jpeg';
 
 interface TutorialCaseProps {
   onComplete: (points: number) => void;
@@ -114,7 +118,7 @@ h1.blog-title {
     id: 'get-hint-demo',
     title: 'Need Help? Use Hints!',
     description: 'Stuck? The hint system is here to help you!',
-    instruction: 'Click the "Get Hint" button to see how hints work.',
+    instruction: 'Click the hint guy (detective character) to see how hints work.',
   },
   {
     id: 'code-validation',
@@ -299,6 +303,20 @@ export const TutorialCase: React.FC<TutorialCaseProps> = ({ onComplete, onBack }
   // Tutorial Overlay Component
   const TutorialOverlay = () => {
     if (!showTutorialOverlay || currentStep.id === 'welcome') return null;
+
+    // Prevent body scroll when overlay is visible
+    React.useEffect(() => {
+      // Save original styles
+      const originalStyle = window.getComputedStyle(document.body).overflow;
+      
+      // Prevent body scroll
+      document.body.style.overflow = 'hidden';
+      
+      // Cleanup function to restore original style
+      return () => {
+        document.body.style.overflow = originalStyle;
+      };
+    }, []);
 
     return (
       <div className="fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center">
@@ -542,9 +560,10 @@ export const TutorialCase: React.FC<TutorialCaseProps> = ({ onComplete, onBack }
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-      {/* Tutorial Overlay */}
-      <TutorialOverlay />
+    <>
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+        {/* Tutorial Overlay */}
+        <TutorialOverlay />
       
       {/* Tutorial Header */}
       <div className="bg-slate-800/90 backdrop-blur-sm border-b border-amber-500/20 px-6 py-4">
@@ -566,6 +585,9 @@ export const TutorialCase: React.FC<TutorialCaseProps> = ({ onComplete, onBack }
                 <span>Hints: {hintsUsed}</span>
               </div>
             </div>
+            
+            {/* Audio Waveform */}
+            <AudioWaveform className="detective-audio-control" />
             
             {/* Exit Tutorial Button */}
             <button
@@ -728,16 +750,28 @@ export const TutorialCase: React.FC<TutorialCaseProps> = ({ onComplete, onBack }
                     Previous
                   </button>
 
-                  {/* Get Hint Button */}
+                  {/* Interactive Hint Guy Button */}
                   <button
                     onClick={handleHint}
-                    className="hint-button w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition-all duration-200 hover:scale-105 text-base font-medium"
+                    className="w-full flex items-center justify-center gap-3 px-4 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition-all duration-200 hover:scale-105 text-base font-medium"
                   >
-                    <Search className="w-5 h-5" />
-                    Get Hint
-                    <span className="bg-blue-800/50 px-2 py-1 rounded-full text-sm">
-                      {hintsUsed}
-                    </span>
+                    <div className="relative">
+                      <img 
+                        src={hintGuyImg} 
+                        alt="Tutorial Helper" 
+                        className="w-8 h-8 rounded-full border-2 border-blue-200 object-cover"
+                      />
+                      {/* Hints used counter badge */}
+                      {hintsUsed > 0 && (
+                        <div className="absolute -top-1 -right-1 w-4 h-4 bg-blue-300 rounded-full flex items-center justify-center">
+                          <span className="text-xs text-blue-800 font-bold">{hintsUsed}</span>
+                        </div>
+                      )}
+                    </div>
+                    <div className="text-center">
+                      <div className="font-medium">Need Help?</div>
+                      <div className="text-xs opacity-90">Click for hint</div>
+                    </div>
                   </button>
 
                   {/* Test Code Button */}
@@ -1048,5 +1082,6 @@ export const TutorialCase: React.FC<TutorialCaseProps> = ({ onComplete, onBack }
       {/* Persistent Hint Panel */}
       <HintPanel />
     </div>
+    </>
   );
 };

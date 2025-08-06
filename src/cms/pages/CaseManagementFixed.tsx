@@ -21,7 +21,7 @@ import {
 import { db } from '../../config/firebase';
 import { collection, getDocs, doc, setDoc } from 'firebase/firestore';
 import { cases as importedCases } from '../../data/cases';
-import toast from 'react-hot-toast';
+import { professionalToast } from '../utils/professionalToast';
 import AdvancedCaseEditor from './AdvancedCaseEditor';
 import { logger, LogCategory } from '../../utils/logger';
 import { showConfirm } from '../../components/CustomAlert';
@@ -141,7 +141,7 @@ const CaseManagement: React.FC = () => {
         }));
         
         setCases(casesWithRealStats);
-        toast.success(`✅ Successfully initialized ${firebaseCases.length} cases in Firebase`);
+        professionalToast.success('Cases Initialized', `Successfully loaded ${firebaseCases.length} cases from Firebase`);
       } else {
         logger.info(`📚 Loaded ${casesSnapshot.size} cases from Firebase`, LogCategory.CMS);
         const firebaseCases = casesSnapshot.docs.map(doc => {
@@ -171,7 +171,7 @@ const CaseManagement: React.FC = () => {
       }
     } catch (error) {
       logger.error('❌ Error loading cases:', error, LogCategory.CMS);
-      toast.error('Failed to load cases from Firebase');
+      professionalToast.error('Loading Failed', 'Failed to load cases from Firebase');
       
       // Fallback to imported cases
       logger.info('🔄 Falling back to imported cases data...', LogCategory.CMS);
@@ -283,7 +283,7 @@ const CaseManagement: React.FC = () => {
           }
           : case_
       ));
-      toast.success('Case updated successfully!');
+      professionalToast.success('Case Updated', 'Case has been successfully updated');
     } else {
       // Create new case
       const newCase: CaseData = {
@@ -296,7 +296,7 @@ const CaseManagement: React.FC = () => {
         updatedAt: new Date()
       };
       setCases([newCase, ...cases]);
-      toast.success('Case created successfully!');
+      professionalToast.success('Case Created', 'New case has been successfully created');
     }
     
     setShowCaseModal(false);
@@ -331,7 +331,7 @@ const CaseManagement: React.FC = () => {
   const handleRefreshFromDataFile = async () => {
     try {
       logger.info(LogCategory.CMS, '🔄 Refreshing cases from data file...');
-      toast.loading('Refreshing cases from data file...', { id: 'refresh-cases' });
+      professionalToast.info('Refreshing', 'Loading cases from data file...');
       
       // Force re-initialization from data file
       await initializeCasesInFirebase();
@@ -339,10 +339,10 @@ const CaseManagement: React.FC = () => {
       // Reload cases
       await loadCases();
       
-      toast.success('✅ Cases refreshed successfully with missions!', { id: 'refresh-cases' });
+      professionalToast.replace('success', 'Refresh Complete', 'Cases refreshed successfully with missions!');
     } catch (error) {
       logger.error(LogCategory.CMS, '❌ Error refreshing cases:', error);
-      toast.error('Failed to refresh cases', { id: 'refresh-cases' });
+      professionalToast.replace('error', 'Refresh Failed', 'Failed to refresh cases from data file');
     }
   };
 
@@ -697,7 +697,7 @@ const CaseManagement: React.FC = () => {
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="bg-slate-800 rounded-xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+            className="bg-slate-800 rounded-xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto custom-scrollbar"
           >
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-xl font-bold text-white">Case Preview</h3>

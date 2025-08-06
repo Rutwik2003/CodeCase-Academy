@@ -397,7 +397,7 @@ const LoggingManagement: React.FC = () => {
           </h2>
         </div>
 
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto custom-scrollbar">
           <table className="w-full">
             <thead className="bg-slate-700/30">
               <tr>
@@ -470,7 +470,7 @@ const LoggingManagement: React.FC = () => {
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="bg-slate-800 rounded-xl border border-slate-700 p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto"
+            className="bg-slate-800 rounded-xl border border-slate-700 p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto custom-scrollbar"
           >
             {(() => {
               const log = filteredLogs.find(l => l.id === showDetails);
@@ -519,7 +519,7 @@ const LoggingManagement: React.FC = () => {
                     {log.details && (
                       <div>
                         <label className="block text-white/60 text-sm mb-1">Details</label>
-                        <pre className="bg-slate-700/50 rounded-lg p-3 text-white text-sm overflow-auto">
+                        <pre className="bg-slate-700/50 rounded-lg p-3 text-white text-sm overflow-auto custom-scrollbar">
                           {JSON.stringify(log.details, null, 2)}
                         </pre>
                       </div>
@@ -528,7 +528,7 @@ const LoggingManagement: React.FC = () => {
                     {log.stackTrace && (
                       <div>
                         <label className="block text-white/60 text-sm mb-1">Stack Trace</label>
-                        <pre className="bg-slate-700/50 rounded-lg p-3 text-white text-xs overflow-auto">
+                        <pre className="bg-slate-700/50 rounded-lg p-3 text-white text-xs overflow-auto custom-scrollbar">
                           {log.stackTrace}
                         </pre>
                       </div>
