@@ -1,0 +1,123 @@
+# 🔐 Security - Environment Files
+.env
+.env.local
+.env.production
+.env.staging
+.env.development
+
+# 📝 Documentation Security - Ignore all markdown files except README.md
+*.md
+!README.md
+docs/
+SECURITY_AUDIT_REPORT.md
+
+# 📁 Dependencies
+node_modules/
+.pnpm-lock.json
+yarn.lock
+
+# 🚀 Build Output
+dist/
+build/
+out/
+.vite/
+.next/
+
+# 📊 Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# 🔧 IDE & Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# 🧪 Testing
+coverage/
+.nyc_output
+.coverage/
+
+# 📱 OS Generated Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# 🔐 Security & Keys
+*.pem
+*.key
+*.cert
+*.p12
+*.pfx
+
+# 🚨 Security - Additional Protection
+*config-static.ts
+*secret*
+*password*
+firebase-test.*
+test-*auth*
+*credentials*
+.secrets/
+
+# 🔐 API Keys & Tokens (patterns)
+*api-key*
+*access-token*
+*auth-token*
+
+# 🚨 CRITICAL: Security Documentation with Exposed Keys
+SECURITY_CRITICAL_FIXES.md
+SECURE_ENVIRONMENT_SETUP.md
+*SECURITY*.md
+*SECRET*.md
+
+# 🚨 Any files containing exposed credentials
+*EXPOSED*
+*LEAKED*
+*CRITICAL*
+
+# 🎯 India-Specific
+# Local development overrides
+.env.india
+.env.mumbai
+.env.delhi
+
+# 🚀 Deployment
+.vercel/
+.netlify/
+.appwrite/
+
+# 📊 Analytics & Monitoring
+.sentry/
+.amplitude/
+
+# 🔧 Cache & Temp
+.cache/
+.temp/
+.tmp/
+*.tsbuildinfo
+
+# 📁 Backup Files
+*.backup
+*.bak
+*.old
+
+# 🎮 Game Data (if any)
+saves/
+user-data/
+
+# 📱 Mobile
+platforms/
+plugins/
+www/
+
+# 🔍 Debug
+debug.log
+*.map

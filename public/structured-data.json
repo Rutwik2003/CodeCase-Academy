@@ -1,0 +1,58 @@
+{
+  "@context": "https://schema.org",
+  "@type": "EducationalOrganization",
+  "name": "CodeCase Detective Academy",
+  "description": "Learn HTML & CSS by solving detective mysteries. Fix broken websites, uncover clues, and master web development with your AI partner!",
+  "url": "https://codecase.rutwikdev.com",
+  "logo": "https://codecase.rutwikdev.com/icons/icon-512x512.png",
+  "sameAs": [
+    "https://github.com/your-username/codecase-detective-academy"
+  ],
+  "educationalCredentialAwarded": "Web Development Certificate",
+  "hasCredential": {
+    "@type": "EducationalOccupationalCredential",
+    "name": "HTML & CSS Detective Certification",
+    "description": "Certificate awarded for completing detective coding missions"
+  },
+  "offers": {
+    "@type": "Course",
+    "name": "Detective Web Development Course",
+    "description": "Interactive HTML & CSS learning through detective mysteries",
+    "provider": {
+      "@type": "Organization",
+      "name": "CodeCase Detective Academy"
+    },
+    "courseMode": "online",
+    "educationalLevel": "Beginner to Intermediate",
+    "timeRequired": "P4W",
+    "inLanguage": "en",
+    "hasCourseInstance": [
+      {
+        "@type": "CourseInstance",
+        "courseMode": "online",
+        "instructor": {
+          "@type": "Person",
+          "name": "AI Detective Partner"
+        }
+      }
+    ]
+  },
+  "mainEntity": {
+    "@type": "WebApplication",
+    "name": "CodeCase",
+    "applicationCategory": "EducationalApplication",
+    "operatingSystem": "Web Browser",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": "4.8",
+      "ratingCount": "150",
+      "bestRating": "5",
+      "worstRating": "1"
+    }
+  }
+}

@@ -1,0 +1,97 @@
+name: Deploy to Vercel
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Run security audit
+      run: npm audit --audit-level high
+      continue-on-error: true
+      
+    - name: Build project
+      run: npm run build
+      env:
+        # Environment variables for codecase.rutwikdev.com
+        VITE_APP_URL: https://codecase.rutwikdev.com
+        VITE_DOMAIN: codecase.rutwikdev.com
+        # Firebase credentials (primary backend)
+        VITE_FIREBASE_API_KEY: ${{ secrets.FIREBASE_API_KEY }}
+        VITE_FIREBASE_AUTH_DOMAIN: ${{ secrets.FIREBASE_AUTH_DOMAIN }}
+        VITE_FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
+        VITE_FIREBASE_STORAGE_BUCKET: ${{ secrets.FIREBASE_STORAGE_BUCKET }}
+        VITE_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.FIREBASE_MESSAGING_SENDER_ID }}
+        VITE_FIREBASE_APP_ID: ${{ secrets.FIREBASE_APP_ID }}
+        VITE_FIREBASE_MEASUREMENT_ID: ${{ secrets.FIREBASE_MEASUREMENT_ID }}
+        # Analytics
+        VITE_GOOGLE_ANALYTICS_ID: ${{ secrets.GOOGLE_ANALYTICS_ID }}
+        VITE_GOOGLE_ANALYTICS_ENABLED: "true"
+        # Security
+        VITE_JWT_SECRET: ${{ secrets.JWT_SECRET }}
+        VITE_CORS_ORIGIN: "https://codecase.rutwikdev.com"
+      
+    - name: Run tests (if available)
+      run: npm run test --if-present
+      
+    - name: Deploy to Vercel (Preview)
+      if: github.event_name == 'pull_request'
+      uses: amondnet/vercel-action@v25
+      with:
+        vercel-token: ${{ secrets.VERCEL_TOKEN }}
+        vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+        vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+        working-directory: ./
+        
+    - name: Deploy to Vercel (Production)
+      if: github.ref == 'refs/heads/main'
+      uses: amondnet/vercel-action@v25
+      with:
+        vercel-token: ${{ secrets.VERCEL_TOKEN }}
+        vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+        vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+        vercel-args: '--prod'
+        working-directory: ./
+        
+    - name: Update sitemap (production only)
+      if: github.ref == 'refs/heads/main'
+      run: |
+        # Domain is already set to codecase.rutwikdev.com in build
+        echo "✅ Domain configuration complete: codecase.rutwikdev.com"
+        echo "🚀 Deployed to Vercel with custom domain"
+        
+    - name: Security check - No secrets in build
+      run: |
+        if grep -r "AIza\|sk_\|pk_" dist/ 2>/dev/null; then
+          echo "🚨 ERROR: Secrets found in build output!"
+          exit 1
+        else
+          echo "✅ No secrets found in build output"
+        fi
+        
+    - name: Notify deployment status
+      uses: 8398a7/action-slack@v3
+      if: always()
+      with:
+        status: ${{ job.status }}
+        channel: '#deployments'
+        webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}

@@ -1,0 +1,47 @@
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://codecase.rutwikdev.com/sitemap.xml
+
+# Allow crawling of important pages
+Allow: /
+Allow: /learn
+Allow: /cases
+Allow: /profile
+Allow: /case/
+Allow: /signin
+Allow: /signup
+Allow: /leaderboard
+Allow: /achievements
+
+# Disallow admin/config pages (if any)
+Disallow: /admin
+Disallow: /config
+Disallow: /_app
+Disallow: /api
+Disallow: /private
+Disallow: /*.json$
+
+# Crawl delay (optional) - Optimized for India
+Crawl-delay: 1
+
+# India-specific optimization
+# Allow Googlebot (popular in India)
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 0
+
+# Allow Bingbot
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 1
+
+# Additional search engines popular in India
+User-agent: DuckDuckBot
+Allow: /
+Crawl-delay: 1
+
+# Cache-Control directives
+# Clean URLs: codecase.rutwikdev.com
+Host: codecase.rutwikdev.com

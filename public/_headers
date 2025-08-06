@@ -1,0 +1,48 @@
+/*
+  # Security Headers
+  X-Frame-Options: DENY
+  X-Content-Type-Options: nosniff
+  X-XSS-Protection: 1; mode=block
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=()
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://firebase.googleapis.com https://firestore.googleapis.com wss://firebase.googleapis.com
+  
+  # Performance Headers
+  Cache-Control: public, max-age=31536000, immutable
+
+# HTML files - shorter cache for dynamic content
+/*.html
+  Cache-Control: public, max-age=3600, must-revalidate
+
+# API routes
+/api/*
+  Cache-Control: no-cache, no-store, must-revalidate
+
+# Static assets - long cache
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# Images
+/icons/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# Fonts
+*.woff2
+  Cache-Control: public, max-age=31536000, immutable
+  
+*.woff
+  Cache-Control: public, max-age=31536000, immutable
+
+# Manifest and service worker
+/manifest.json
+  Cache-Control: public, max-age=86400
+  
+/sw.js
+  Cache-Control: no-cache, no-store, must-revalidate
+
+# Sitemap and robots
+/sitemap.xml
+  Cache-Control: public, max-age=86400
+  
+/robots.txt
+  Cache-Control: public, max-age=86400

@@ -1,0 +1,76 @@
+{
+  "analytics": {
+    "googleAnalytics": {
+      "measurementId": "G-XXXXXXXXXX",
+      "trackingEvents": [
+        "page_view",
+        "case_started",
+        "case_completed", 
+        "user_signup",
+        "user_signin",
+        "achievement_unlocked",
+        "referral_used"
+      ]
+    },
+    "microsoftClarity": {
+      "projectId": "XXXXXXXXX",
+      "enabled": true
+    },
+    "googleSearchConsole": {
+      "siteVerification": "XXXXXXXXXXXXXXXXXXXXXXXXX",
+      "domain": "codecase.rutwikdev.com"
+    },
+    "bingWebmasterTools": {
+      "siteVerification": "XXXXXXXXXXXXXXXXXXXXXXXXX",
+      "domain": "codecase.rutwikdev.com"
+    }
+  },
+  "seo": {
+    "sitemap": {
+      "generateDynamic": true,
+      "includeImages": true,
+      "includeMobile": true,
+      "priority": {
+        "home": 1.0,
+        "learn": 0.9,
+        "cases": 0.8,
+        "profile": 0.7,
+        "case_pages": 0.8,
+        "auth": 0.5,
+        "other": 0.6
+      }
+    },
+    "metadata": {
+      "defaultTitle": "CodeCase Detective Academy | Learn HTML & CSS Through Mysteries",
+      "titleTemplate": "%s | CodeCase Detective Academy",
+      "defaultDescription": "🔍 Master HTML & CSS by solving detective mysteries! Interactive coding education platform for Indian students.",
+      "keywords": [
+        "HTML tutorial India",
+        "CSS learning",
+        "coding bootcamp",
+        "web development",
+        "programming education",
+        "interactive learning",
+        "detective coding game"
+      ]
+    },
+    "socialSharing": {
+      "twitterCard": "summary_large_image",
+      "openGraph": {
+        "type": "website",
+        "locale": "en_IN",
+        "site_name": "CodeCase Detective Academy"
+      }
+    }
+  },
+  "performance": {
+    "criticalResourceHints": [
+      "https://fonts.googleapis.com",
+      "https://fonts.gstatic.com",
+      "https://cloud.appwrite.io"
+    ],
+    "lazyLoadImages": true,
+    "inlineCSS": true,
+    "minimizeRenderBlocking": true
+  }
+}

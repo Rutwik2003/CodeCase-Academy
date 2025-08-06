@@ -1,0 +1,82 @@
+{
+  "domain": "codecase.rutwikdev.com",
+  "url": "https://codecase.rutwikdev.com",
+  "siteName": "CodeCase Detective Academy",
+  "title": "CodeCase Detective Academy | Learn HTML & CSS Through Mysteries in India",
+  "description": "🔍 Master HTML & CSS by solving detective mysteries! Interactive coding education platform for Indian students. Learn web development with AI detective partner. Free coding bootcamp in India.",
+  "keywords": [
+    "HTML tutorial India",
+    "CSS learning Hindi", 
+    "coding bootcamp Mumbai",
+    "web development Delhi",
+    "programming course Bangalore",
+    "JavaScript Chennai",
+    "React Hyderabad",
+    "coding classes India",
+    "learn programming India",
+    "interactive coding education",
+    "detective coding game",
+    "web development tutorial",
+    "HTML CSS JavaScript learning",
+    "India programming education"
+  ],
+  "author": "CodeCase Academy India",
+  "publisher": "CodeCase Detective Academy",
+  "language": "en-IN",
+  "locale": "en_IN",
+  "region": "IN",
+  "country": "India",
+  "city": "Mumbai",
+  "social": {
+    "twitter": "@CodeCaseIN",
+    "github": "codecase-detective-academy"
+  },
+  "images": {
+    "ogImage": "https://codecase.rutwikdev.com/og-image.png",
+    "twitterCard": "https://codecase.rutwikdev.com/twitter-card.png",
+    "logo": "https://codecase.rutwikdev.com/icons/icon-512x512.png",
+    "favicon": "https://codecase.rutwikdev.com/favicon.ico"
+  },
+  "structuredData": {
+    "@context": "https://schema.org",
+    "@type": "EducationalOrganization",
+    "name": "CodeCase Detective Academy",
+    "description": "Interactive coding education platform for Indian students. Learn HTML & CSS through detective mysteries.",
+    "url": "https://codecase.rutwikdev.com",
+    "logo": "https://codecase.rutwikdev.com/icons/icon-512x512.png",
+    "sameAs": [
+      "https://github.com/codecase-detective-academy"
+    ],
+    "address": {
+      "@type": "PostalAddress",
+      "addressCountry": "IN",
+      "addressRegion": "Maharashtra", 
+      "addressLocality": "Mumbai"
+    },
+    "areaServed": {
+      "@type": "Country",
+      "name": "India"
+    },
+    "educationalCredentialAwarded": "Web Development Certificate",
+    "inLanguage": "en-IN",
+    "audience": {
+      "@type": "EducationalAudience",
+      "audienceType": "student",
+      "geographicArea": {
+        "@type": "Country",
+        "name": "India"
+      }
+    }
+  },
+  "performance": {
+    "preconnectDomains": [
+      "https://fonts.googleapis.com",
+      "https://fonts.gstatic.com",
+      "https://cloud.appwrite.io"
+    ],
+    "dnsPrefetchDomains": [
+      "https://cloud.appwrite.io",
+      "https://firebase.googleapis.com"
+    ]
+  }
+}

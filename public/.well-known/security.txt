@@ -1,0 +1,7 @@
+Contact: mailto:security@rutwikdev.com
+Expires: 2026-07-30T23:59:59.000Z
+Encryption: https://codecase.rutwikdev.com/pgp-key.txt
+Acknowledgments: https://codecase.rutwikdev.com/security/acknowledgments
+Policy: https://codecase.rutwikdev.com/security/policy
+Preferred-Languages: en, hi
+Canonical: https://codecase.rutwikdev.com/.well-known/security.txt
